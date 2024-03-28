@@ -5,10 +5,11 @@ resource "azurerm_application_insights_workbook" "application_insights_workbook"
   display_name        = "Secrets and Certificate Expiration"
 
   data_json = templatefile("${path.module}/../scripts/workbooks/azure-secret-certificate-notification-logs.json",
-  {
-    resourceGroup = azurerm_resource_group.resource_group.name,
-    workspaceName = azurerm_log_analytics_workspace.log_analytics_workspace.name
-    tableName = azapi_resource.workspaces_table.name
+    {
+      resourceGroup  = azurerm_resource_group.resource_group.name,
+      workspaceName  = azurerm_log_analytics_workspace.log_analytics_workspace.name
+      tableName      = azapi_resource.workspaces_table.name,
+      subscriptionId = var.subscription_id
   })
 
   tags = local.tags
