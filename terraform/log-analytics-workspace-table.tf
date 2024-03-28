@@ -2,7 +2,6 @@ resource "azapi_resource" "workspaces_table" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
   name      = "${var.project}_${var.environment}_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  #parent_id = azurerm_resource_group.resource_group.id
 
   body = jsonencode({
     properties = {

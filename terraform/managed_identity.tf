@@ -8,7 +8,6 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 
 resource "azurerm_role_assignment" "assign_identity_automation_account_global_reader" {
   scope = data.azurerm_subscription.primary.id
-  #role_definition_id = "f2ef992c-3afb-46b9-b7cf-a126ee74c451" #"Global Reader"
   role_definition_name = "Reader"
   principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
 

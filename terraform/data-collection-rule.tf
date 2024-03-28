@@ -8,7 +8,6 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule" {
     log_analytics {
       workspace_resource_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
       name                  = azurerm_log_analytics_workspace.log_analytics_workspace.name
-      #name                  = "${var.project}-${var.environment}-log"
     }
   }
 
