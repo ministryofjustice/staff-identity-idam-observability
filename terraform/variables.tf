@@ -20,7 +20,7 @@ variable "client_secret" {
 
 variable "project" {
   type        = string
-  default     = "idamobs"
+  default     = "observability"
   description = "Short name for the project. Used for name prefixing of resources."
 }
 
@@ -38,6 +38,12 @@ variable "location" {
 
 variable "department" {
   type        = string
-  default     = "eucsidam"
-  description = "Azure region for resources to be deployed to."
+  default     = "eucs"
+  description = "Department name."
+}
+
+variable "team" {
+  type        = string
+  default     = "idam"
+  description = "Team Name."
 }

@@ -1,5 +1,5 @@
 resource "azurerm_automation_account" "automation_account" {
-  name                = "${var.project}-${var.environment}-managed-identity"
+  name                = "${var.department}-${var.team}-${var.project}-managed-identity"
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name
   sku_name            = "Basic"
@@ -19,7 +19,7 @@ resource "azurerm_automation_account" "automation_account" {
 }
 
 resource "azurerm_automation_schedule" "automation_schedule" {
-  name                    = "${var.project}-${var.environment}-automation-schedule"
+  name                    = "${var.department}-${var.team}-${var.project}-automation-schedule"
   resource_group_name     = azurerm_resource_group.resource_group.name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"

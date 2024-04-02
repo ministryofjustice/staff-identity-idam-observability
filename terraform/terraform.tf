@@ -37,6 +37,8 @@ locals {
   tags = {
     environment = var.environment
     department  = var.department
+    team        = var.team
+    project     = var.project
     source      = "terraform"
   }
 }
