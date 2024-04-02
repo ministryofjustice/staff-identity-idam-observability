@@ -23,12 +23,3 @@ Any information needed to get the repository working should be documented and ke
 ## pre-commit
 
 Pre-commit hooks allow you to run checks on files before they are committed. This is to prevent mistakes that only get caught during CI/CD and reducing the amount of tidy up/refactor commits in your code. For a list of supported hooks, see this link [https://pre-commit.com/hooks.html](https://pre-commit.com/hooks.html).
-
-TODO: 
-    - Final test works properly in dev env
-    - What is the minimum user access required to run and build this via TF?
-    - Setup alerting weekly for idam team
-    - Create from desktop first in DEVL, NLE and Live
-
-    - GitHub Actions security check for Azure and TF best practices
-    - GA Environments setup with manual approval step
