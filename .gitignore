@@ -12,4 +12,6 @@ env/
 **/.terraform/
 **/terraform.tfstate.d/
 *.tfplan
+*.plan
 *.tfstate*
+tf.json
