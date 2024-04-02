@@ -1,7 +1,7 @@
 resource "azurerm_user_assigned_identity" "managed_identity" {
   name                = "${var.department}-${var.team}-${var.project}-managed-identity"
-  location            = azurerm_resource_group.resource_group.location
-  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = var.location
+  resource_group_name = local.rg_name
 
   tags = local.tags
 }

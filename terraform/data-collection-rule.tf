@@ -1,7 +1,7 @@
 resource "azurerm_monitor_data_collection_rule" "data_collection_rule" {
   name                        = "${var.department}-${var.team}-${var.project}-dcrule"
-  location                    = azurerm_resource_group.resource_group.location
-  resource_group_name         = azurerm_resource_group.resource_group.name
+  location                    = var.location
+  resource_group_name         = local.rg_name
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.id
 
   destinations {

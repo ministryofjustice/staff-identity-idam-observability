@@ -27,13 +27,14 @@ provider "azapi" {
   client_secret   = var.client_secret
 
   default_tags     = local.tags
-  default_location = azurerm_resource_group.resource_group.location
+  default_location = var.location
 }
 
 data "azurerm_subscription" "primary" {
 }
 
 locals {
+  rg_name = "rg-${var.department}-${var.team}-${var.project}"
   tags = {
     environment = var.environment
     department  = var.department

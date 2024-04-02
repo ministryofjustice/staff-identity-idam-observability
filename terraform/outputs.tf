@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.resource_group.name
+  value = local.rg_name
 }
 
 output "client_id" {
