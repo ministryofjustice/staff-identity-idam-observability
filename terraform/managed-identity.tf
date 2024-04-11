@@ -1,5 +1,5 @@
 resource "azurerm_user_assigned_identity" "managed_identity" {
-  name                = "${var.department}-${var.team}-${var.project}-managed-identity"
+  name                = "mi-${var.department}-${var.team}-${var.project}"
   location            = var.location
   resource_group_name = local.rg_name
 
