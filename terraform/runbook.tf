@@ -3,7 +3,7 @@ data "local_file" "app_registrations_secrets_certs_script" {
 }
 
 resource "azurerm_automation_runbook" "runbook" {
-  name                    = "${var.department}-${var.team}-${var.project}-runbook"
+  name                    = "rb-${var.department}-${var.team}-${var.project}"
   location                = var.location
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name

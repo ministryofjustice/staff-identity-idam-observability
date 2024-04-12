@@ -19,7 +19,7 @@ resource "azurerm_automation_account" "automation_account" {
 }
 
 resource "azurerm_automation_schedule" "automation_schedule" {
-  name                    = "${var.department}-${var.team}-${var.project}-automation-schedule"
+  name                    = "as-${var.department}-${var.team}-${var.project}"
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"
