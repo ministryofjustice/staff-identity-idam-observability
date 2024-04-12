@@ -35,6 +35,10 @@ In the Resource Group -> Access Control (IAM), give the `` the following Roles.
 * Reader over the Subscription
 * User Access Administrator over this Resource Group and Subscription
 
+### Client Secret
+
+Create a new client secret to be used for running the Terraform/Pipeline locally or in GitHub.
+
 ## Run Terraform
 
 Run your Terraform to setup the resources in your Resource Group.
