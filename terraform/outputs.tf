@@ -18,6 +18,10 @@ output "dcr_id" {
   value = azurerm_monitor_data_collection_rule.data_collection_rule.id
 }
 
+output "dcr_immutable_id" {
+  value = azurerm_monitor_data_collection_rule.data_collection_rule.immutable_id
+}
+
 output "workspace_table_name" {
   value = azapi_resource.workspaces_table.name
 }
