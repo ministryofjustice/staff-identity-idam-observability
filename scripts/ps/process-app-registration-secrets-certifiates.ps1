@@ -11,7 +11,7 @@ param (
 function PostLogAnalyticsData()
 {   
     param (
-        [Parameter(Mandatory=$true)] [string]$logBody,
+        [Parameter(Mandatory=$true)][string]$logBody,
         [Parameter(Mandatory=$true)][string]$dcrImmutableId,
         [Parameter(Mandatory=$true)][string]$dceURI,
         [Parameter(Mandatory=$true)][string]$table
@@ -66,13 +66,13 @@ $appWithCredentials += $applications | Sort-Object -Property DisplayName | ForEa
     # Use the Get-AzADAppCredential cmdlet to get the Certificates & secrets configured (this returns StartDate, EndDate, KeyID, Type, Usage, CustomKeyIdentifier)
     # Populate the array with the DisplayName, ObjectId, ApplicationId, KeyId, Type, StartDate and EndDate of each Certificates & secrets for each App Registration
     $application | Get-AzADAppCredential -ErrorAction SilentlyContinue | Select-Object `
-    -Property @{Name='DisplayName'; Expression={$application.DisplayName}}, `
-    @{Name='ObjectId'; Expression={$application.Id}}, `
-    @{Name='ApplicationId'; Expression={$application.AppId}}, `
-    @{Name='KeyId'; Expression={$_.KeyId}}, `
-    @{Name='EventType'; Expression={if($_.Type -ne $null) {'Certificate'} else {'Secret'}}},`
-    @{Name='StartDate'; Expression={$_.StartDateTime -as [datetime]}},`
-    @{Name='EndDate'; Expression={$_.EndDateTime -as [datetime]}}                                                                                                                                                                                                                                                               
+    -Property @{Name='displayname'; Expression={$application.DisplayName}}, `
+    @{Name='objectid'; Expression={$application.Id}}, `
+    @{Name='applicationid'; Expression={$application.AppId}}, `
+    @{Name='keyid'; Expression={$_.KeyId}}, `
+    @{Name='eventtype'; Expression={if($_.Type -ne $null) {'Certificate'} else {'Secret'}}},`
+    @{Name='startdate'; Expression={$_.StartDateTime -as [datetime]}},`
+    @{Name='enddate'; Expression={$_.EndDateTime -as [datetime]}}                                                                                                                                                                                                                                                               
   }
 
 # With the $application array populated with the Certificates & secrets and its App Registration, proceed to calculate and add the fields to each record in the array:
@@ -87,15 +87,15 @@ $appWithCredentials | Sort-Object EndDate | ForEach-Object {
   # First if catches certificates & secrets that are expired
         if($_.EndDate -lt $today) {
             $days= ($_.EndDate-$Today).Days
-            $_ | Add-Member -MemberType NoteProperty -Name 'Status' -Value 'Expired'
+            $_ | Add-Member -MemberType NoteProperty -Name 'status' -Value 'Expired'
             $_ | Add-Member -MemberType NoteProperty -Name 'TimeGenerated' -Value "$timestamp"
-            $_ | Add-Member -MemberType NoteProperty -Name 'DaysToExpiration' -Value $days
+            $_ | Add-Member -MemberType NoteProperty -Name 'daystoexpiration' -Value $days
             # Second if catches certificates & secrets that are still valid
         }  else {
             $days= ($_.EndDate-$Today).Days
-            $_ | Add-Member -MemberType NoteProperty -Name 'Status' -Value 'Valid'
+            $_ | Add-Member -MemberType NoteProperty -Name 'status' -Value 'Valid'
             $_ | Add-Member -MemberType NoteProperty -Name 'TimeGenerated' -Value "$timestamp"
-            $_ | Add-Member -MemberType NoteProperty -Name 'DaysToExpiration' -Value $days
+            $_ | Add-Member -MemberType NoteProperty -Name 'daystoexpiration' -Value $days
         }
 }
 

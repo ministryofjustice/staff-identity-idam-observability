@@ -7,4 +7,11 @@ env/
 .vscode
 *.code-workspace
 *.sha256
-terraform.tfstate
+
+*.*.tfvars
+**/.terraform/
+**/terraform.tfstate.d/
+*.tfplan
+*.plan
+*.tfstate*
+tf.json
