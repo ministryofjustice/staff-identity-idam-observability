@@ -29,7 +29,7 @@ Create a new App Registration using the following naming convention.
 
 For example: `eucs-idam-observability-pipeline`
 
-In the Resource Group -> Access Control (IAM), give the `` the following Roles.
+In the Resource Group -> Access Control (IAM), give the pipeline the following Roles.
 
 * Owner over this Resource Group
 * Reader over the Subscription
@@ -45,4 +45,6 @@ Run your Terraform to setup the resources in your Resource Group.
 
 ## Set Managed Identity permission
 
-Go to Enterprise applications and find your App Registration. Assign the role Directory Reader to your Managed Identity to allow it to read all app registration details. 
+Go to Enterprise applications and find your App Registration. Assign the role Directory Reader to your Managed Identity to allow it to read all app registration details.
+
+We set this manually rather than through code, meaning we do not give the pipeline a higher set of permissions.
