@@ -1,0 +1,59 @@
+name: "[Job] Azure Terraform Plan"
+
+on:
+  workflow_call:
+    inputs:
+      workspace_name:
+        description: 'The terraform workspace to target for environment actions'
+        required: true
+        type: string
+    secrets:
+      arm_client_id:
+        description: 'AWS Access Key ID'
+        required: true
+      arm_client_secret:
+        description: 'AWS Secret Access Key'
+        required: true
+      arm_tenant_id:
+        description: 'SSH Deploy Key'
+        required: true
+      arm_subscription_id:
+        description: 'SSH Deploy Key'
+        required: true
+      github_access_token:
+        description: 'Github Token'
+        required: true
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  terraform_plan_workflow:
+    name: "${{ inputs.workspace_name }} deployment"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3.1.0
+
+      - name: Check formatting
+        id: tf_fmt
+        run: terraform fmt -check -recursive
+        working-directory: ./terraform
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform
+
+      - name: Terraform Plan
+        id: terraform_plan
+        env:
+          TF_WORKSPACE: ${{ inputs.workspace_name }}
+          TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
+          TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
+          TF_VAR_client_id: ${{ secrets.arm_client_id }}
+          TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+        run: |
+          terraform plan -lock-timeout=300s -input=false -parallelism=30 -out=terraform.plan
+        working-directory: ./terraform

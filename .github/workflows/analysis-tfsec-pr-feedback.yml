@@ -1,0 +1,26 @@
+name: "[Analysis] TFSec PR feedback"
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**.tf"
+
+jobs:
+  tfsec:
+    name: TFSec Static analysis
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: tfsec with pr comments
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ github.token }}
+          soft_fail_commenter: true
+          tfsec_version: v1.28.1
+          tfsec_args: --concise-output --force-all-dirs

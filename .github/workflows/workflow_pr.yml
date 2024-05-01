@@ -1,0 +1,36 @@
+name: "[Workflow] PR"
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+  security-events: write
+  pull-requests: write
+  actions: none
+  checks: none
+  deployments: none
+  issues: write
+  packages: none
+  repository-projects: none
+  statuses: none
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  
+  terraform_plan_workflow:
+    name: TF Plan
+    uses: ./.github/workflows/terraform_plan_job.yml
+    with:
+      workspace_name: DEVL
+    secrets:
+      arm_subscription_id: ${{ secrets.arm_subscription_id }}
+      arm_tenant_id: ${{ secrets.arm_tenant_id }}
+      arm_client_id: ${{ secrets.arm_client_id }}
+      arm_client_secret: ${{ secrets.arm_client_secret }}
