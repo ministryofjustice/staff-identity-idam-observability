@@ -1,5 +1,5 @@
 ---
-title: PR Pipeline
+title: Merge to main pipeline
 ---
 ```mermaid
 flowchart TD
@@ -27,6 +27,6 @@ flowchart TD
     tfinit_live --> tfvalidate_live(Terraform Validate)
     tfvalidate_live --> tfplan_live(Terraform Plan)
     tfplan_live --> approve_live{Manual Approval Passed?}
-    
+
     approve_live -- Yes --> final(Results)
 ```

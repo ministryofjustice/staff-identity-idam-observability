@@ -1,5 +1,5 @@
 ---
-title: PR Pipeline
+title: PR pipeline
 ---
 ```mermaid
 flowchart TD
