@@ -34,3 +34,4 @@ jobs:
       arm_tenant_id: ${{ secrets.arm_tenant_id }}
       arm_client_id: ${{ secrets.arm_client_id }}
       arm_client_secret: ${{ secrets.arm_client_secret }}
+      github_access_token: ${{ secrets.GITHUB_TOKEN }}

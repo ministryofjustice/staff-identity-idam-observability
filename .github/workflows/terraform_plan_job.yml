@@ -9,16 +9,16 @@ on:
         type: string
     secrets:
       arm_client_id:
-        description: 'AWS Access Key ID'
+        description: 'Azure ARM Client ID'
         required: true
       arm_client_secret:
-        description: 'AWS Secret Access Key'
+        description: 'Azure ARM Client Secret'
         required: true
       arm_tenant_id:
-        description: 'SSH Deploy Key'
+        description: 'ARM Tenant ID'
         required: true
       arm_subscription_id:
-        description: 'SSH Deploy Key'
+        description: 'ARM Subscription ID'
         required: true
       github_access_token:
         description: 'Github Token'
