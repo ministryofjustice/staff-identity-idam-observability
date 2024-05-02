@@ -30,6 +30,7 @@ jobs:
     with:
       workspace_name: DEVL
     secrets:
+      azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
       arm_subscription_id: ${{ secrets.arm_subscription_id }}
       arm_tenant_id: ${{ secrets.arm_tenant_id }}
       arm_client_id: ${{ secrets.arm_client_id }}

@@ -8,6 +8,9 @@ on:
         required: true
         type: string
     secrets:
+      azure_credentials:
+        description: 'JSON formatted list of azure credentials'
+        required: true
       arm_client_id:
         description: 'Azure ARM Client ID'
         required: true
