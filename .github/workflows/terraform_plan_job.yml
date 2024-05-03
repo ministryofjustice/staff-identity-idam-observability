@@ -55,9 +55,9 @@ jobs:
         run: terraform fmt -check -recursive
         working-directory: ./terraform
         continue-on-error: true
-
-      - name: Terraform Validate
-        run: terraform validate
+        
+      - name: Terraform Init
+        run: terraform init -input=false
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
@@ -66,8 +66,8 @@ jobs:
           TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
         working-directory: ./terraform
 
-      - name: Terraform Init
-        run: terraform init -input=false
+      - name: Terraform Validate
+        run: terraform validate
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
