@@ -11,7 +11,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "rg-eucs-idam-observability"
-    storage_account_name = var.state_storage_account_name
+    storage_account_name = "stidamobservetfstate"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }
