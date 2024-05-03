@@ -47,3 +47,9 @@ variable "team" {
   default     = "idam"
   description = "Team Name."
 }
+
+variable "state_storage_account_name" {
+  type        = string
+  default     = "stidamobservetfstate"
+  description = "Storage account name for TF state file."
+}

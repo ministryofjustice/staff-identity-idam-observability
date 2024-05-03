@@ -7,6 +7,10 @@ on:
         description: 'The terraform workspace to target for environment actions'
         required: true
         type: string
+      state_storage_account_name:
+        description: 'Storage account name for TF state file.'
+        required: true
+        type: string
     secrets:
       azure_credentials:
         description: 'JSON formatted list of azure credentials'
@@ -64,6 +68,7 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
           TF_VAR_client_id: ${{ secrets.arm_client_id }}
           TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         working-directory: ./terraform
 
       - name: Terraform Validate
@@ -74,6 +79,7 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
           TF_VAR_client_id: ${{ secrets.arm_client_id }}
           TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         working-directory: ./terraform
 
       - name: Terraform Plan
@@ -84,6 +90,7 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
           TF_VAR_client_id: ${{ secrets.arm_client_id }}
           TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         run: |
           terraform plan -lock-timeout=300s -input=false
         working-directory: ./terraform
