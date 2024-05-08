@@ -24,12 +24,6 @@ variable "project" {
   description = "Short name for the project. Used for name prefixing of resources."
 }
 
-variable "environment" {
-  type        = string
-  default     = "dev"
-  description = "Environment short name. Used for tags."
-}
-
 variable "location" {
   type        = string
   default     = "uksouth"
