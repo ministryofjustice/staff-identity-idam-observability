@@ -27,7 +27,7 @@ jobs:
   terraform_plan_workflow:
     strategy:
       matrix:
-        environment: ["DEVL"]
+        environment: ["DEVL", "NLE"]
     name: TF Plan ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_plan_job.yml
     with:
@@ -38,4 +38,8 @@ jobs:
       arm_tenant_id: ${{ secrets.arm_tenant_id }}
       arm_client_id: ${{ secrets.arm_client_id }}
       arm_client_secret: ${{ secrets.arm_client_secret }}
+      workspace_subscription_id: ${{ secrets.workspace_subscription_id }}
+      workspace_tenant_id: ${{ secrets.workspace_tenant_id }}
+      workspace_client_id: ${{ secrets.workspace_client_id }}
+      workspace_client_secret: ${{ secrets.workspace_client_secret }}
       github_access_token: ${{ secrets.GITHUB_TOKEN }}

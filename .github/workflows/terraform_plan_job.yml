@@ -24,6 +24,18 @@ on:
       arm_subscription_id:
         description: 'ARM Subscription ID'
         required: true
+      workspace_client_id:
+        description: 'Azure ARM Client ID for TF Workspace'
+        required: true
+      workspace_client_secret:
+        description: 'Azure ARM Client Secret for TF Workspace'
+        required: true
+      workspace_tenant_id:
+        description: 'ARM Tenant ID for TF Workspace'
+        required: true
+      workspace_subscription_id:
+        description: 'ARM Subscription ID for TF Workspace'
+        required: true
       github_access_token:
         description: 'Github Token'
         required: true
@@ -61,10 +73,10 @@ jobs:
         run: terraform init -input=false
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.arm_client_id }}
-          TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
+          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
+          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
+          TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
           TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         working-directory: ./terraform
 
@@ -72,10 +84,10 @@ jobs:
         run: terraform validate
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.arm_client_id }}
-          TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
+          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
+          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
+          TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
           TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         working-directory: ./terraform
 
@@ -83,10 +95,10 @@ jobs:
         id: terraform_plan
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.arm_client_id }}
-          TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
+          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
+          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
+          TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
           TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
         run: |
           terraform plan -lock-timeout=300s -input=false
