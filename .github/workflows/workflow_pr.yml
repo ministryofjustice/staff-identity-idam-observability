@@ -25,10 +25,13 @@ defaults:
 jobs:
   
   terraform_plan_workflow:
-    name: TF Plan
+    strategy:
+      matrix:
+        environment: ["DEVL"]
+    name: TF Plan ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_plan_job.yml
     with:
-      workspace_name: DEVL
+      workspace_name: ${{ matrix.environment }}
       state_storage_account_name: stidamobservetfstate
     secrets:
       arm_subscription_id: ${{ secrets.arm_subscription_id }}
