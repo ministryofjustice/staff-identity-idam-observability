@@ -1,4 +1,4 @@
-name: "[Job] Azure Terraform Plan"
+name: "[Job] Azure Terraform Apply"
 
 on:
   workflow_call:
@@ -43,9 +43,9 @@ permissions:
   contents: read
 
 jobs:
-  terraform_plan_workflow:
+  terraform_apply_workflow:
     environment: ${{ inputs.workspace_name }}
-    name: "${{ inputs.workspace_name }} plan"
+    name: "${{ inputs.workspace_name }} deployment"
     runs-on: ubuntu-latest
     env:
       ARM_CLIENT_ID: ${{ secrets.arm_client_id }}
@@ -59,11 +59,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
-
-      - name: Check formatting
-        run: terraform fmt -check -recursive
-        working-directory: ./terraform
-        continue-on-error: true
         
       - name: Terraform Init
         run: terraform init -input=false
@@ -75,18 +70,8 @@ jobs:
           TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
         working-directory: ./terraform
 
-      - name: Terraform Validate
-        run: terraform validate
-        env:
-          TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
-        working-directory: ./terraform
-
-      - name: Terraform Plan
-        id: terraform_plan
+      - name: Terraform Apply
+        id: terraform_apply
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
@@ -94,5 +79,5 @@ jobs:
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
           TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
         run: |
-          terraform plan -lock-timeout=300s -input=false
+          terraform apply -lock-timeout=300s -input=false -auto-approve -parallelism=30 
         working-directory: ./terraform
