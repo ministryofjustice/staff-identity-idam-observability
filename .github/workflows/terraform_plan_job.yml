@@ -37,6 +37,11 @@ jobs:
   terraform_plan_workflow:
     name: "${{ inputs.workspace_name }} deployment"
     runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.arm_client_id }}
+      ARM_CLIENT_SECRET: ${{ secrets.arm_client_secret }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
+      ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
     steps:
       - uses: actions/checkout@v4
 
@@ -44,13 +49,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
-
-      - name: Export Azure Login Credentials
-        run: |
-          echo "ARM_CLIENT_ID=${{ secrets.arm_client_id }}" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=${{ secrets.arm_client_secret }}" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=${{ secrets.arm_subscription_id }}" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=${{ secrets.arm_tenant_id }}" >> $GITHUB_ENV
 
       - name: Check formatting
         run: terraform fmt -check -recursive
