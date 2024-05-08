@@ -32,6 +32,7 @@ permissions:
   pull-requests: write
   issues: write
   id-token: write
+  contents: read
 
 jobs:
   terraform_plan_workflow:
@@ -49,6 +50,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: false
+
+      - name: Set Terraform Workspace to ${{ inputs.workspace_name }}
+        run: terraform workspace select ${{ inputs.workspace_name }}
+        working-directory: ./terraform
 
       - name: Check formatting
         run: terraform fmt -check -recursive
