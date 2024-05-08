@@ -42,9 +42,9 @@ data "azurerm_subscription" "primary" {
 locals {
   rg_name = "rg-${var.department}-${var.team}-${var.project}"
   tags = {
-    department  = var.department
-    team        = var.team
-    project     = var.project
-    source      = "terraform"
+    department = var.department
+    team       = var.team
+    project    = var.project
+    source     = "terraform"
   }
 }
