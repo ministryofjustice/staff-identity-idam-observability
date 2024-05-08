@@ -51,10 +51,6 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Set Terraform Workspace to ${{ inputs.workspace_name }}
-        run: terraform workspace select ${{ inputs.workspace_name }}
-        working-directory: ./terraform
-
       - name: Check formatting
         run: terraform fmt -check -recursive
         working-directory: ./terraform
@@ -62,6 +58,21 @@ jobs:
         
       - name: Terraform Init
         run: terraform init -input=false
+        env:
+          TF_WORKSPACE: ${{ inputs.workspace_name }}
+          TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
+          TF_VAR_tenant_id: ${{ secrets.arm_tenant_id }}
+          TF_VAR_client_id: ${{ secrets.arm_client_id }}
+          TF_VAR_client_secret: ${{ secrets.arm_client_secret }}
+          TF_VAR_state_storage_account_name: ${{ inputs.state_storage_account_name }}
+          ARM_CLIENT_ID: ${{ secrets.arm_client_id }}
+          ARM_CLIENT_SECRET: ${{ secrets.arm_client_secret }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
+          ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
+        working-directory: ./terraform
+
+      - name: Set Terraform Workspace to ${{ inputs.workspace_name }}
+        run: terraform workspace select ${{ inputs.workspace_name }}
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.arm_subscription_id }}
