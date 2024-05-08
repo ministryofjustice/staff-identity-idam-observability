@@ -36,6 +36,7 @@ permissions:
 
 jobs:
   terraform_plan_workflow:
+    environment: ${{ inputs.workspace_name }}
     name: "${{ inputs.workspace_name }} deployment"
     runs-on: ubuntu-latest
     env:
