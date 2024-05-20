@@ -11,7 +11,7 @@ terraform {
   }
   backend "azurerm" {
     resource_group_name  = "rg-eucs-idam-observability"
-    storage_account_name = "stidamobservetfstate"
+    storage_account_name = "stidamobservetfstate003"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
   }
@@ -42,10 +42,9 @@ data "azurerm_subscription" "primary" {
 locals {
   rg_name = "rg-${var.department}-${var.team}-${var.project}"
   tags = {
-    environment = var.environment
-    department  = var.department
-    team        = var.team
-    project     = var.project
-    source      = "terraform"
+    department = var.department
+    team       = var.team
+    project    = var.project
+    source     = "terraform"
   }
 }

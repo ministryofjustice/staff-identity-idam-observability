@@ -24,12 +24,6 @@ variable "project" {
   description = "Short name for the project. Used for name prefixing of resources."
 }
 
-variable "environment" {
-  type        = string
-  default     = "dev"
-  description = "Environment short name. Used for tags."
-}
-
 variable "location" {
   type        = string
   default     = "uksouth"
@@ -46,4 +40,10 @@ variable "team" {
   type        = string
   default     = "idam"
   description = "Team Name."
+}
+
+variable "state_storage_account_name" {
+  type        = string
+  default     = "stidamobservetfstate"
+  description = "Storage account name for TF state file."
 }
