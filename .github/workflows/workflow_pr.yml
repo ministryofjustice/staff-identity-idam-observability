@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - terraform/**
+      - scripts/**
 
 permissions:
   id-token: write
