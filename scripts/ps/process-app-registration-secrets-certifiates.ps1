@@ -12,6 +12,10 @@ param (
     [string]$LogTableName
 )
 
+# --- Start variables
+$timeStamp = Get-Date -format o
+$excludedUpns = @("Matthew.White1@justice.gov.uk", "John.Dryden@justice.gov.uk", "jdryden-admin@devl.justice.gov.uk")
+
 # --- Start Functions
 function PostLogAnalyticsData()
 {   
@@ -33,6 +37,24 @@ function PostLogAnalyticsData()
     $method = "POST"
     $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table"+"?api-version=2023-01-01";
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
+}
+
+function ApplicationOwnersAsCsv($applicationId) {
+    $owners = Get-MgApplicationOwnerAsUser -ApplicationId $applicationId -Property UserPrincipalName | Select-Object UserPrincipalName
+
+    $cleanedOwners = foreach ($owner in $owners){
+        if ($owner.UserPrincipalName | Where-Object { $_ -notin $excludedUpns }) {
+            if ($owner.UserPrincipalName | Where-Object { -not $_.EndsWith("@JusticeUK.onmicrosoft.com") }) {
+                [PSCustomObject]@{
+                    UserPrincipalName         = $owner.UserPrincipalName
+                }
+            }
+        }
+    }
+
+    $cleanedOwners = $cleanedOwners | ConvertTo-Csv -NoTypeInformation -NoHeader
+
+    ($cleanedOwners -join ",")
 }
 
 function GenerateCredentials() {
