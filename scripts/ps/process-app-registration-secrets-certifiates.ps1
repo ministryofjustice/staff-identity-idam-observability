@@ -1,5 +1,9 @@
 <#
-DESCRIPTION: Process app registration secrets and certifiates
+    .SYNOPSIS
+    A script to send a list of credentials with their expiry to Log Analytics
+    
+    .DESCRIPTION
+    Leverage Microsoft Graph API and PowerShell to fetch a list of credentials (Certificates and Secrets) that are on Application Registrations, work out their expiry details, owners and send the data to Log Analytics..
 #>
 param (
     [string]$MiClientId,
@@ -8,6 +12,7 @@ param (
     [string]$LogTableName
 )
 
+# --- Start Functions
 function PostLogAnalyticsData()
 {   
     param (
@@ -30,10 +35,81 @@ function PostLogAnalyticsData()
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
+function GenerateCredentials() {
+
+    Write-LogInfo("Fetch all Application Registrations")
+
+    $applications = Get-MgApplication -All | Select-Object AppId, DisplayName, PasswordCredentials, KeyCredentials, Id, Owners | Sort-Object -Property DisplayName
+    Write-LogInfo("$(([PSObject[]]($applications)).Count) Applications Found.")
+
+    $CertificateApps  = $applications | Where-Object {$_.keyCredentials}
+    Write-LogInfo("$(([PSObject[]]($CertificateApps)).Count) Applications with Certificates Found.")
+
+    $ClientSecretApps = $applications | Where-Object {$_.passwordCredentials}
+    Write-LogInfo("$(([PSObject[]]($ClientSecretApps)).Count) Applications with Secrets Found.")
+
+    
+    $CertApp = foreach ($App in $CertificateApps) {
+        foreach ($Cert in $App.KeyCredentials) {
+            $daysToExpiry = (($Cert.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
+            $expiredState = "valid"
+            if($daysToExpiry -lt 1) {
+                $expiredState = "expired"
+            }
+            [PSCustomObject]@{
+                displayname         = $App.DisplayName
+                applicationid       = $App.AppId
+                eventtype           = 'Certificate'
+                startdate           = $Cert.StartDateTime
+                enddate             = $Cert.EndDateTime
+                daystoexpiration    = $daysToExpiry
+                objectid            = $App.Id
+                keyid               = $Cert.KeyId
+                description         = $Cert.DisplayName
+                TimeGenerated       = $timeStamp
+                status              = $expiredState
+                owners              = ApplicationOwnersAsCsv($App.Id)
+            }
+        }
+    }
+    
+    Write-LogInfo("$(([PSObject[]]($CertApp)).Count) Certificates Found.")
+    
+    $SecretApp = foreach ($App in $ClientSecretApps){
+        foreach ($Secret in $App.PasswordCredentials) {
+            $daysToExpiry = (($Secret.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
+            $expiredState = "valid"
+            if($daysToExpiry -lt 1) {
+                $expiredState = "expired"
+            }
+            [PSCustomObject]@{
+                displayname         = $App.DisplayName
+                applicationid       = $App.AppId
+                eventtype           = 'Secret'
+                startdate           = $Secret.StartDateTime
+                enddate             = $Secret.EndDateTime
+                DaysUntilExpiration = $daysToExpiry
+                objectid            = $App.Id
+                keyid               = $Secret.KeyId
+                description         = $Secret.DisplayName
+                TimeGenerated       = $timeStamp
+                status              = $expiredState
+                owners              = ApplicationOwnersAsCsv($App.Id)
+            }
+        }
+    }
+    
+    Write-LogInfo("$(([PSObject[]]($SecretApp)).Count) Secrets Found.")
+
+}
+
+# --- Start Script Execution
+Write-LogInfo("Script execution started")
 
 # Authenticate with the credentials object
 try 
 {
+    Write-LogInfo("Authenticate to Azure")
     # Ensures you do not inherit an AzContext in your runbook
     Disable-AzContextAutosave -Scope Process
 
@@ -42,7 +118,7 @@ try
 
     $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
     $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
-    write-output "context is $context"
+    Write-LogInfo("Context is $context")
 } 
 catch 
 {
@@ -50,56 +126,13 @@ catch
   throw "$($_.Exception)"
 }
 
-# Get the full list of Azure AD App Registrations
-$applications = Get-AzADApplication
-
-write-output ([PSObject[]]($applications)).Count
-
-# Create an array named appWithCredentials
-$appWithCredentials = @()
-
-# Retrieve the list of applications and sort them by DisplayName
-$appWithCredentials += $applications | Sort-Object -Property DisplayName | ForEach-Object {
-    # Assign the variable application with the follow list of properties
-    $application = $_
-
-    # Use the Get-AzADAppCredential cmdlet to get the Certificates & secrets configured (this returns StartDate, EndDate, KeyID, Type, Usage, CustomKeyIdentifier)
-    # Populate the array with the DisplayName, ObjectId, ApplicationId, KeyId, Type, StartDate and EndDate of each Certificates & secrets for each App Registration
-    $application | Get-AzADAppCredential -ErrorAction SilentlyContinue | Select-Object `
-    -Property @{Name='displayname'; Expression={$application.DisplayName}}, `
-    @{Name='objectid'; Expression={$application.Id}}, `
-    @{Name='applicationid'; Expression={$application.AppId}}, `
-    @{Name='keyid'; Expression={$_.KeyId}}, `
-    @{Name='eventtype'; Expression={if($_.Type -ne $null) {'Certificate'} else {'Secret'}}},`
-    @{Name='startdate'; Expression={$_.StartDateTime -as [datetime]}},`
-    @{Name='enddate'; Expression={$_.EndDateTime -as [datetime]}}                                                                                                                                                                                                                                                               
-  }
-
-# With the $application array populated with the Certificates & secrets and its App Registration, proceed to calculate and add the fields to each record in the array:
-# Expiration of the certificate or secret - Valid or Expired
-# Add the timestamp used to calculate the validity
-# The days until the certificate or secret expires
-
-$timeStamp = Get-Date -format o
-$today = (Get-Date).ToUniversalTime()
-
-$appWithCredentials | Sort-Object EndDate | ForEach-Object {
-  # First if catches certificates & secrets that are expired
-        if($_.EndDate -lt $today) {
-            $days= ($_.EndDate-$Today).Days
-            $_ | Add-Member -MemberType NoteProperty -Name 'status' -Value 'Expired'
-            $_ | Add-Member -MemberType NoteProperty -Name 'TimeGenerated' -Value "$timestamp"
-            $_ | Add-Member -MemberType NoteProperty -Name 'daystoexpiration' -Value $days
-            # Second if catches certificates & secrets that are still valid
-        }  else {
-            $days= ($_.EndDate-$Today).Days
-            $_ | Add-Member -MemberType NoteProperty -Name 'status' -Value 'Valid'
-            $_ | Add-Member -MemberType NoteProperty -Name 'TimeGenerated' -Value "$timestamp"
-            $_ | Add-Member -MemberType NoteProperty -Name 'daystoexpiration' -Value $days
-        }
-}
+$appWithCredentials = GenerateCredentials
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
-$appWithCredentialsJSON = $appWithCredentials | convertto-json
+Write-LogInfo("Convert Credentials list to JSON")
+$appWithCredentialsJSON = $appWithCredentials | ConvertTo-Json
 
+Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $appWithCredentialsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+
+Write-LogInfo("Script execution finished")
