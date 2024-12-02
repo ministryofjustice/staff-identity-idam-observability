@@ -48,6 +48,10 @@ resource "azapi_resource" "workspaces_table" {
           {
             name = "daystoexpiration",
             type = "int"
+          },
+          {
+            name = "owners",
+            type = "string"
           }
         ]
       }

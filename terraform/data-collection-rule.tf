@@ -67,6 +67,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule" {
       name = "daystoexpiration"
       type = "int"
     }
+    column {
+      name = "owners"
+      type = "string"
+    }
   }
 
   description = "Data collection rule"
