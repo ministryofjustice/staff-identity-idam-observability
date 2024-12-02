@@ -14,9 +14,13 @@ param (
 
 # --- Start variables
 $timeStamp = Get-Date -format o
-$excludedUpns = @("Matthew.White1@justice.gov.uk", "John.Dryden@justice.gov.uk", "jdryden-admin@devl.justice.gov.uk")
+$excludedUpns = @("Matthew.White1@justice.gov.uk", "John.Dryden@justice.gov.uk")
 
 # --- Start Functions
+function Write-LogInfo($logentry) {
+    Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
+}
+
 function PostLogAnalyticsData()
 {   
     param (
@@ -52,31 +56,33 @@ function ApplicationOwnersAsCsv($applicationId) {
         }
     }
 
-    $cleanedOwners = $cleanedOwners | ConvertTo-Csv -NoTypeInformation -NoHeader
+    $cleanedOwners = $cleanedOwners | ConvertTo-Csv -NoTypeInformation    
 
-    ($cleanedOwners -join ",")
+    return ($cleanedOwners -join "," -replace ('"', '') -replace ('UserPrincipalName,', ''))
 }
 
 function GenerateCredentials() {
 
-    Write-LogInfo("Fetch all Application Registrations")
+    #Write-LogInfo("Fetch all Application Registrations")
 
     $applications = Get-MgApplication -All | Select-Object AppId, DisplayName, PasswordCredentials, KeyCredentials, Id, Owners | Sort-Object -Property DisplayName
-    Write-LogInfo("$(([PSObject[]]($applications)).Count) Applications Found.")
+    #Write-LogInfo("$(([PSObject[]]($applications)).Count) Applications Found.")
 
     $CertificateApps  = $applications | Where-Object {$_.keyCredentials}
-    Write-LogInfo("$(([PSObject[]]($CertificateApps)).Count) Applications with Certificates Found.")
+    #Write-LogInfo("$(([PSObject[]]($CertificateApps)).Count) Applications with Certificates Found.")
 
     $ClientSecretApps = $applications | Where-Object {$_.passwordCredentials}
-    Write-LogInfo("$(([PSObject[]]($ClientSecretApps)).Count) Applications with Secrets Found.")
+    #Write-LogInfo("$(([PSObject[]]($ClientSecretApps)).Count) Applications with Secrets Found.")
 
     
     $CertApp = foreach ($App in $CertificateApps) {
         foreach ($Cert in $App.KeyCredentials) {
+            $applicationOwners = ApplicationOwnersAsCsv($App.Id)
+
             $daysToExpiry = (($Cert.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
-            $expiredState = "valid"
+            $expiredState = "Valid"
             if($daysToExpiry -lt 1) {
-                $expiredState = "expired"
+                $expiredState = "Expired"
             }
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
@@ -90,19 +96,21 @@ function GenerateCredentials() {
                 description         = $Cert.DisplayName
                 TimeGenerated       = $timeStamp
                 status              = $expiredState
-                owners              = ApplicationOwnersAsCsv($App.Id)
+                owners              = $applicationOwners
             }
         }
     }
     
-    Write-LogInfo("$(([PSObject[]]($CertApp)).Count) Certificates Found.")
+    #Write-LogInfo("$(([PSObject[]]($CertApp)).Count) Certificates Found.")
     
     $SecretApp = foreach ($App in $ClientSecretApps){
         foreach ($Secret in $App.PasswordCredentials) {
+            $applicationOwners = ApplicationOwnersAsCsv($App.Id)
+
             $daysToExpiry = (($Secret.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
-            $expiredState = "valid"
+            $expiredState = "Valid"
             if($daysToExpiry -lt 1) {
-                $expiredState = "expired"
+                $expiredState = "Expired"
             }
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
@@ -110,19 +118,19 @@ function GenerateCredentials() {
                 eventtype           = 'Secret'
                 startdate           = $Secret.StartDateTime
                 enddate             = $Secret.EndDateTime
-                DaysUntilExpiration = $daysToExpiry
+                daystoexpiration    = $daysToExpiry
                 objectid            = $App.Id
                 keyid               = $Secret.KeyId
                 description         = $Secret.DisplayName
                 TimeGenerated       = $timeStamp
                 status              = $expiredState
-                owners              = ApplicationOwnersAsCsv($App.Id)
+                owners              = $applicationOwners
             }
         }
     }
     
-    Write-LogInfo("$(([PSObject[]]($SecretApp)).Count) Secrets Found.")
-
+    #Write-LogInfo("$(([PSObject[]]($SecretApp)).Count) Secrets Found.")
+    $SecretApp + $CertApp
 }
 
 # --- Start Script Execution
@@ -140,6 +148,8 @@ try
 
     $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
     $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
+
+    Connect-MgGraph -Identity -ClientId $MiClientId
     Write-LogInfo("Context is $context")
 } 
 catch 
@@ -149,6 +159,8 @@ catch
 }
 
 $appWithCredentials = GenerateCredentials
+
+Write-LogInfo("$(([PSObject[]]($appWithCredentials)).Count) Total Credentials Found.")
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
