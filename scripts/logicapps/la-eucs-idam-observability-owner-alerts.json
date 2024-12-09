@@ -1,0 +1,234 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Day",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "hours": [
+                            "8"
+                        ],
+                        "minutes": [
+                            0
+                        ]
+                    }
+                },
+                "conditions": []
+            }
+        },
+        "actions": {
+            "Run_query_and_list_results": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": "eucs_idam_observability_logs_CL\n| where status == 'Valid'\n| where daystoexpiration > 0 and daystoexpiration < 60\n| summarize arg_max(keyid, *) by keyid\n| project displayname, keyid, applicationid, CredentialType = eventtype, daystoexpiration, enddate, owners\n| sort by daystoexpiration asc",
+                    "path": "/queryData",
+                    "queries": {
+                        "subscriptions": "a3700371-a683-46ec-92d9-3a23460fef30",
+                        "resourcegroups": "rg-eucs-idam-observability",
+                        "resourcetype": "Log Analytics Workspace",
+                        "resourcename": "log-eucsidamobservability",
+                        "timerange": "Last 12 hours"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Parse_JSON": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@body('Run_query_and_list_results')?['value']",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "displayname": {
+                                    "type": "string"
+                                },
+                                "keyid": {
+                                    "type": "string"
+                                },
+                                "applicationid": {
+                                    "type": "string"
+                                },
+                                "CredentialType": {
+                                    "type": "string"
+                                },
+                                "daystoexpiration": {
+                                    "type": "integer"
+                                },
+                                "enddate": {
+                                    "type": "string"
+                                },
+                                "owners": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "displayname",
+                                "keyid",
+                                "applicationid",
+                                "CredentialType",
+                                "daystoexpiration",
+                                "enddate",
+                                "owners"
+                            ]
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Run_query_and_list_results": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "For_each": {
+                "type": "Foreach",
+                "foreach": "@body('Parse_JSON')",
+                "actions": {
+                    "Condition": {
+                        "type": "If",
+                        "expression": {
+                            "and": [
+                                {
+                                    "not": {
+                                        "equals": [
+                                            "@empty(items('For_each')['owners'])",
+                                            true
+                                        ]
+                                    }
+                                },
+                                {
+                                    "or": [
+                                        {
+                                            "equals": [
+                                                "@items('For_each')['daystoexpiration']",
+                                                90
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@items('For_each')['daystoexpiration']",
+                                                60
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@items('For_each')['daystoexpiration']",
+                                                30
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@items('For_each')['daystoexpiration']",
+                                                15
+                                            ]
+                                        },
+                                        {
+                                            "equals": [
+                                                "@items('For_each')['daystoexpiration']",
+                                                5
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "actions": {
+                            "Send_an_email_(V2)": {
+                                "type": "ApiConnection",
+                                "inputs": {
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['office365']['connectionId']"
+                                        }
+                                    },
+                                    "method": "post",
+                                    "body": {
+                                        "To": "@items('For_each')['owners']",
+                                        "Subject": "Action required: Renew your Application Registration @{items('For_each')['CredentialType']} in Microsoft Entra ID",
+                                        "Body": "<h1 class=\"editor-heading-h1\">Please renew your Application Registration @{items('For_each')['CredentialType']} in Ministry of Justice<br></h1><p class=\"editor-paragraph\">You’re receiving this notification because your email address is associated with @{items('For_each')['displayname']}.<br><br>The certificate used for single sign-on to @{items('For_each')['displayname']} is going to expire in @{items('For_each')['daystoexpiration']} days on @{items('For_each')['enddate']}.</p><h2 class=\"editor-heading-h2\">Details</h2><p class=\"editor-paragraph\"><b><strong class=\"editor-text-bold\">Application Name</strong></b>: @{items('For_each')['displayname']}</p><p class=\"editor-paragraph\"><b><strong class=\"editor-text-bold\">Application ID</strong></b>: @{items('For_each')['applicationid']})</p><p class=\"editor-paragraph\"><b><strong class=\"editor-text-bold\">Expires on</strong></b>: @{items('For_each')['enddate']}</p><p class=\"editor-paragraph\"><b><strong class=\"editor-text-bold\">Expires in</strong></b>: @{items('For_each')['daystoexpiration']} days</p><br><h2 class=\"editor-heading-h2\">Recommended action</h2><p class=\"editor-paragraph\">Please take action to ensure your credentials are renewed before this date. Failure to do so could result in the loss of your service.<br><br>For guidance on how to update your credential yourself or via ServiceNow, please follow this link <a href=\"https://user-guide.staff-identity.service.justice.gov.uk/documentation/guidance/appreg.html#renewing-credentials\" class=\"editor-link\">https://user-guide.staff-identity.service.justice.gov.uk/documentation/guidance/appreg.html#renewing-credentials</a></p>",
+                                        "From": "idam@justice.gov.uk",
+                                        "Bcc": "john.nolan@justice.gov.uk",
+                                        "Importance": "High"
+                                    },
+                                    "path": "/v2/Mail"
+                                }
+                            },
+                            "Post_card_in_a_chat_or_channel": {
+                                "type": "ApiConnection",
+                                "inputs": {
+                                    "host": {
+                                        "connection": {
+                                            "name": "@parameters('$connections')['teams']['connectionId']"
+                                        }
+                                    },
+                                    "method": "post",
+                                    "body": {
+                                        "recipient": {
+                                            "groupId": "4d77795f-a511-4de5-b6a6-4340a66e0ba9",
+                                            "channelId": "19:e4dcd929e4bb42aeb2d491111f59fcd3@thread.tacv2"
+                                        },
+                                        "messageBody": "{\n    \"type\": \"AdaptiveCard\",\n    \"$schema\": \"http://adaptivecards.io/schemas/adaptive-card.json\",\n    \"version\": \"1.4\",\n    \"body\": [\n        {\n            \"type\": \"Container\",\n            \"items\": [\n                {\n                    \"type\": \"TextBlock\",\n                    \"text\": \"Application Registration Credential Alert Sent\",\n                    \"wrap\": true,\n                    \"spacing\": \"ExtraLarge\",\n                    \"fontType\": \"Default\",\n                    \"size\": \"Medium\",\n                    \"weight\": \"Bolder\",\n                    \"color\": \"Attention\"\n                }\n            ]\n        },\n        {\n            \"type\": \"Container\",\n            \"items\": [\n                {\n                    \"type\": \"FactSet\",\n                    \"facts\": [\n                        {\n                            \"title\": \"Credential Type:\",\n                            \"value\": \"@{items('For_each')['CredentialType']}\"\n                        },\n                        {\n                            \"title\": \"Application Name:\",\n                            \"value\": \"@{items('For_each')['displayname']}\"\n                        },\n                        {\n                            \"title\": \"Application ID:\",\n                            \"value\": \"@{items('For_each')['applicationid']}\"\n                        },\n                        {\n                            \"title\": \"Expires on:\",\n                            \"value\": \"@{items('For_each')['enddate']}\"\n                        },\n                        {\n                            \"title\": \"Expires in:\",\n                            \"value\": \"@{items('For_each')['daystoexpiration']} days\"\n                        },\n                        {\n                            \"title\": \"Email sent to:\",\n                            \"value\": \"@{items('For_each')['owners']}\"\n                        }\n                    ]\n                }\n            ]\n        }\n    ]\n}"
+                                    },
+                                    "path": "/v1.0/teams/conversation/adaptivecard/poster/Flow bot/location/@{encodeURIComponent('Channel')}"
+                                },
+                                "runAfter": {
+                                    "Send_an_email_(V2)": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {}
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuremonitorlogs": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/azuremonitorlogs",
+                    "connectionName": "azuremonitorlogs"
+                },
+                "office365": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/office365",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/office365",
+                    "connectionName": "office365"
+                },
+                "teams": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/teams",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/teams",
+                    "connectionName": "teams"
+                }
+            }
+        }
+    }
+}
