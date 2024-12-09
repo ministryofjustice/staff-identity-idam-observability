@@ -1,0 +1,114 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Recurrence": {
+                "type": "Recurrence",
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Week",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "weekDays": [
+                            "Monday"
+                        ],
+                        "hours": [
+                            "6"
+                        ],
+                        "minutes": [
+                            0
+                        ]
+                    }
+                }
+            }
+        },
+        "actions": {
+            "Run_query_and_list_results": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": "eucs_idam_observability_logs_CL\n| where status == 'Valid'\n| where daystoexpiration > 0 and daystoexpiration < 60\n| summarize arg_max(keyid, *) by keyid\n| project displayname, keyid, applicationid, CredentialType = eventtype, daystoexpiration, enddate, owners\n| sort by daystoexpiration asc",
+                    "path": "/queryData",
+                    "queries": {
+                        "subscriptions": "a3700371-a683-46ec-92d9-3a23460fef30",
+                        "resourcegroups": "rg-eucs-idam-observability",
+                        "resourcetype": "Log Analytics Workspace",
+                        "resourcename": "log-eucsidamobservability",
+                        "timerange": "Last 24 hours"
+                    }
+                },
+                "runAfter": {}
+            },
+            "Create_CSV_table": {
+                "type": "Table",
+                "inputs": {
+                    "from": "@body('Run_query_and_list_results')?['value']",
+                    "format": "CSV"
+                },
+                "runAfter": {
+                    "Run_query_and_list_results": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Send_an_email_(V2)": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['office365']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": {
+                        "To": "IDAMTeam@justice.gov.uk",
+                        "Subject": "LIVE Certificates & Secrets Expiring in 60 Days",
+                        "Body": "<p>Certificates &amp; Secrets Expiring in 60 Days report attached as a CSV.</p>",
+                        "Attachments": [
+                            {
+                                "Name": "certs-secrets.csv",
+                                "ContentBytes": "@{base64(body('Create_CSV_table'))}"
+                            }
+                        ],
+                        "Importance": "Normal"
+                    },
+                    "path": "/v2/Mail"
+                },
+                "runAfter": {
+                    "Create_CSV_table": [
+                        "Succeeded"
+                    ]
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuremonitorlogs": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/azuremonitorlogs",
+                    "connectionName": "azuremonitorlogs"
+                },
+                "office365": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/office365",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/office365",
+                    "connectionName": "office365"
+                }
+            }
+        }
+    }
+}
