@@ -25,6 +25,7 @@ resource "azurerm_automation_schedule" "automation_schedule" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
+  start_time              = "2025-01-15T07:00:00+01:00"
   description             = "Run export daily."
 }
 
