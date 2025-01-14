@@ -1,0 +1,117 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Day",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "hours": [
+                            "7"
+                        ],
+                        "minutes": [
+                            0
+                        ]
+                    }
+                },
+                "evaluatedRecurrence": {
+                    "interval": 1,
+                    "frequency": "Day",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "hours": [
+                            "7"
+                        ],
+                        "minutes": [
+                            0
+                        ]
+                    }
+                },
+                "type": "Recurrence"
+            }
+        },
+        "actions": {
+            "Run_query_and_list_results": {
+                "runAfter": {},
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": "eucs_idam_observability_logs_CL\n| where status == 'Valid'\n| where daystoexpiration == 60\n| summarize arg_max(keyid, *) by keyid\n| project displayname, keyid, applicationid, CredentialType = eventtype, daystoexpiration, enddate, owners\n| sort by daystoexpiration asc",
+                    "path": "/queryData",
+                    "queries": {
+                        "subscriptions": "a3700371-a683-46ec-92d9-3a23460fef30",
+                        "resourcegroups": "rg-eucs-idam-observability",
+                        "resourcetype": "Log Analytics Workspace",
+                        "resourcename": "log-eucsidamobservability",
+                        "timerange": "Last 24 hours"
+                    }
+                }
+            },
+            "For_each": {
+                "foreach": "@body('Run_query_and_list_results')?['value']",
+                "actions": {
+                    "Create_item": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "body": {
+                                "ApplicationId": "@item()?['applicationid']",
+                                "DisplayName": "@item()?['displayname']",
+                                "KeyId": "@item()?['keyid']",
+                                "DaysUntilExpiration": "@item()?['daystoexpiration']",
+                                "ExpirationDate": "@item()?['enddate']",
+                                "EventType": "@item()?['CredentialType']",
+                                "Owner": "@item()?['owners']",
+                                "Fixed": false,
+                                "EntraLink": "https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/@{item()?['applicationid']}/isMSAApp~/false"
+                            },
+                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://justiceuk.sharepoint.com/sites/IDAM2'))}/tables/@{encodeURIComponent(encodeURIComponent('eec0444b-c3c3-4f84-b1e8-ade3cc4e5574'))}/items"
+                        }
+                    }
+                },
+                "runAfter": {
+                    "Run_query_and_list_results": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuremonitorlogs": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/azuremonitorlogs",
+                    "connectionName": "azuremonitorlogs"
+                },
+                "sharepointonline": {
+                    "id": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/providers/Microsoft.Web/locations/uksouth/managedApis/sharepointonline",
+                    "connectionId": "/subscriptions/a3700371-a683-46ec-92d9-3a23460fef30/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/sharepointonline",
+                    "connectionName": "sharepointonline"
+                }
+            }
+        }
+    }
+}
