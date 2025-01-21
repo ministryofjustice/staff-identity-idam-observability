@@ -164,9 +164,19 @@ Write-LogInfo("$(([PSObject[]]($appWithCredentials)).Count) Total Credentials Fo
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
-$appWithCredentialsJSON = $appWithCredentials | ConvertTo-Json
+$splitAt = [Math]::Round($appWithCredentials.Count / 2)
+
+$appWithCredentials1, $appWithCredentials2 = $appWithCredentials.Where(
+ { $_ },
+ 'Split', $splitAt
+)
+
+$appWithCredentialsJSON1 = $appWithCredentials1 | ConvertTo-Json
+$appWithCredentialsJSON2 = $appWithCredentials2 | ConvertTo-Json
 
 Write-LogInfo("Post data to Log Analytics")
-PostLogAnalyticsData -logBody $appWithCredentialsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $appWithCredentialsJSON1 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+
+PostLogAnalyticsData -logBody $appWithCredentialsJSON2 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
 
 Write-LogInfo("Script execution finished")
