@@ -49,7 +49,7 @@ jobs:
   terraform_apply_workflow:
     strategy:
       matrix:
-        environment: ["LIVE"]
+        environment: ["DEVL", "NLE", "LIVE"]
     needs: [terraform_plan_workflow]
     name: TF Apply ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_apply_job.yml
