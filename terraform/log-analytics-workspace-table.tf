@@ -66,14 +66,14 @@ resource "azapi_resource" "workspaces_table" {
 
 resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
-  name      = "${var.department}_${var.team}_${var.project}_creds_cleanup_script_logs_CL"
+  name      = "${var.department}_${var.team}_${var.project}_creds_cleanup_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   body = jsonencode({
     properties = {
       plan = "Analytics",
       schema = {
-        name = "${var.department}_${var.team}_${var.project}_creds_cleanup_script_logs_CL",
+        name = "${var.department}_${var.team}_${var.project}_creds_cleanup_logs_CL",
         columns = [
           {
             name = "displayname",
