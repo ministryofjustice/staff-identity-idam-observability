@@ -19,7 +19,7 @@ output "log_table_name" {
 }
 
 output "log_table_name_creds_cleanup_script" {
-  value = azapi_resource.workspaces_table.name
+  value = azapi_resource.workspaces_table_creds_cleanup_script.name
 }
 
 output "dceuri" {
