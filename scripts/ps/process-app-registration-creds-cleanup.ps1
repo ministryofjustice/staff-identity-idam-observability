@@ -89,7 +89,7 @@ function GenerateCredentials() {
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
                 applicationid       = $App.AppId
-                eventtype           = 'Certificate'
+                credtype            = 'Certificate'
                 startdate           = $Cert.StartDateTime
                 enddate             = $Cert.EndDateTime
                 daystoexpiration    = $daysToExpiry
@@ -120,7 +120,7 @@ function GenerateCredentials() {
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
                 applicationid       = $App.AppId
-                eventtype           = 'Secret'
+                credtype            = 'Secret'
                 startdate           = $Secret.StartDateTime
                 enddate             = $Secret.EndDateTime
                 daystoexpiration    = $daysToExpiry

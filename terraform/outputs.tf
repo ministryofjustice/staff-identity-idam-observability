@@ -18,6 +18,10 @@ output "log_table_name" {
   value = azapi_resource.workspaces_table.name
 }
 
+output "log_table_name_creds_cleanup_script" {
+  value = azapi_resource.workspaces_table_creds_cleanup_script.name
+}
+
 output "dceuri" {
   value = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint
 }
