@@ -105,7 +105,7 @@ function GenerateCredentials() {
     # Store expired certs as a variable
     # Could add logic to only count expired creds over 30 days? Just as a precaution
     $ExpiredCerts = $CertApp | where {$_.status -EQ "Expired"}
-    Write-Host "$($ExpiredCerts.Count) Expired Certificates Found."
+    #Write-Host "$($ExpiredCerts.Count) Expired Certificates Found."
 
     # Retrieve secrets
     $SecretApp = foreach ($App in $ClientSecretApps){
@@ -136,11 +136,11 @@ function GenerateCredentials() {
     # Store expired secrets as a variable
     # Added logic to only count expired creds over 30 days, just as a precaution
     $ExpiredSecrets = $SecretApp | where {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
-    Write-Host "$($ExpiredSecrets.Count) Expired Secrets Found."
+    #Write-Host "$($ExpiredSecrets.Count) Expired Secrets Found."
     
     # Combine expired credentials
-    $ExpiredCreds = $ExpiredCerts + $ExpiredSecrets
-
+    #$ExpiredCreds = $ExpiredCerts + $ExpiredSecrets
+    $ExpiredCerts + $ExpiredSecrets
     
 }
 
@@ -149,12 +149,36 @@ function RemoveExpiredCredentials {
 $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
 #$ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration
 
-    foreach ($ExpiredCred in $ExpiredCredsTrimmed){
+    $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
-        Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -WhatIf
-       #Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
-    }
+            try
+                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -WhatIf
+                #Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
+                $removal = $?
+                }
+                catch
+                {
+                $removal = "$($_.Exception)"
+                }
 
+                           [PSCustomObject]@{
+                        displayname         = $ExpiredCred.displayname
+                        cleanup             = $removal
+                        applicationid       = $ExpiredCred.applicationid
+                        credtype            = $ExpiredCred.credtype
+                        startdate           = $ExpiredCred.startdate
+                        enddate             = $ExpiredCred.enddate
+                        daystoexpiration    = $ExpiredCred.daystoexpiration
+                        objectid            = $ExpiredCred.objectid
+                        keyid               = $ExpiredCred.keyid
+                        description         = $ExpiredCred.description
+                        TimeGenerated       = $ExpiredCred.TimeGenerated
+                        status              = $ExpiredCred.status
+                        owners              = $ExpiredCred.owners
+                    }
+                 
+    }
+    $clean
 }
 
 # --- Start Script Execution
@@ -182,15 +206,18 @@ catch
   throw "$($_.Exception)"
 }
 
-$appWithCredentials = GenerateCredentials
 
-Write-LogInfo("$(([PSObject[]]($appWithCredentials)).Count) Total Credentials Found.")
+$ExpiredCreds = GenerateCredentials
+$RemovedCreds = RemoveExpiredCredentials
+
+
+Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials Found (expired over 30 days).")
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
-$appWithCredentialsJSON = $appWithCredentials | ConvertTo-Json
+$RemovedCredsJSON = $RemovedCreds | ConvertTo-Json
 
 Write-LogInfo("Post data to Log Analytics")
-PostLogAnalyticsData -logBody $appWithCredentialsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $RemovedCredsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
 
 Write-LogInfo("Script execution finished")
