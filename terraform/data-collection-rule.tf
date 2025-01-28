@@ -144,6 +144,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
       type = "datetime"
     }
     column {
+      name = "description"
+      type = "string"
+    }
+    column {
       name = "status"
       type = "string"
     }
