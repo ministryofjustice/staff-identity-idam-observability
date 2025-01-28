@@ -80,6 +80,10 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
             type = "string"
           },
           {
+            name = "status",
+            type = "string"
+          },
+          {
             name = "objectid",
             type = "string"
           },
