@@ -210,7 +210,7 @@ Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials 
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
-$RemovedCredsJSON = ConvertTo-Json@($RemovedCreds)
+$RemovedCredsJSON = ConvertTo-Json @($RemovedCreds)
 
 Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $RemovedCredsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
