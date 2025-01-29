@@ -79,12 +79,20 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
             name = "displayname",
             type = "string"
           },
+#          {
+#            name = "cleanup",
+#            type = "string"
+#          },
           {
-            name = "cleanup",
+            name = "objectid",
             type = "string"
           },
           {
             name = "applicationid",
+            type = "string"
+          },
+          {
+            name = "keyid",
             type = "string"
           },
           {
@@ -100,19 +108,7 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
             type = "dateTime"
           },
           {
-            name = "daystoexpiration",
-            type = "int"
-          },
-          {
-            name = "objectid",
-            type = "string"
-          },
-          {
-            name = "keyid",
-            type = "string"
-          },
-          {
-            name = "description",
+            name = "status",
             type = "string"
           },
           {
@@ -120,8 +116,8 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
             type = "dateTime"
           },
           {
-            name = "status",
-            type = "string"
+            name = "daystoexpiration",
+            type = "int"
           },
           {
             name = "owners",

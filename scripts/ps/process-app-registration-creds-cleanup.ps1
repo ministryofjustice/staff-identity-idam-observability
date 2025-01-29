@@ -163,7 +163,7 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
 
                            [PSCustomObject]@{
                         displayname         = $ExpiredCred.displayname
-                        cleanup             = $removal
+#                       cleanup             = $removal
                         applicationid       = $ExpiredCred.applicationid
                         credtype            = $ExpiredCred.credtype
                         startdate           = $ExpiredCred.startdate
