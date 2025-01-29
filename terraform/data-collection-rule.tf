@@ -120,15 +120,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
       type = "string"
     }
     column {
-      name = "objectid"
-      type = "string"
-    }
-    column {
       name = "applicationid"
-      type = "string"
-    }
-    column {
-      name = "keyid"
       type = "string"
     }
     column {
@@ -144,11 +136,19 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
       type = "datetime"
     }
     column {
-      name = "description"
+      name = "daystoexpiration"
+      type = "int"
+    }
+    column {
+      name = "objectid"
       type = "string"
     }
     column {
-      name = "status"
+      name = "keyid"
+      type = "string"
+    }
+    column {
+      name = "description"
       type = "string"
     }
     column {
@@ -156,8 +156,8 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
       type = "datetime"
     }
     column {
-      name = "daystoexpiration"
-      type = "int"
+      name = "status"
+      type = "string"
     }
     column {
       name = "owners"
