@@ -163,7 +163,7 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
 
                            [PSCustomObject]@{
                         displayname         = $ExpiredCred.displayname
-#                       cleanup             = $removal
+                        cleanup             = $removal
                         applicationid       = $ExpiredCred.applicationid
                         credtype            = $ExpiredCred.credtype
                         startdate           = $ExpiredCred.startdate
@@ -215,7 +215,7 @@ Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials 
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
-$RemovedCredsJSON = $RemovedCreds | ConvertTo-Json
+$RemovedCredsJSON = ConvertTo-Json@($RemovedCreds)
 
 Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $RemovedCredsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
