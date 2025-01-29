@@ -115,10 +115,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
       name = "displayname"
       type = "string"
     }
-#    column {
-#      name = "cleanup"
-#      type = "string"
-#    }
+    column {
+      name = "cleanup"
+      type = "string"
+    }
     column {
       name = "applicationid"
       type = "string"

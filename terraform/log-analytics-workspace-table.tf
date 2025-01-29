@@ -79,10 +79,10 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
             name = "displayname",
             type = "string"
           },
-#          {
-#            name = "cleanup",
-#            type = "string"
-#          },
+          {
+            name = "cleanup",
+            type = "string"
+          },
           {
             name = "objectid",
             type = "string"
