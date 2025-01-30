@@ -148,7 +148,7 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
             $ErrorActionPreference = "stop"
             try
-                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
+                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -ErrorAction stop
                 $removal = "Removed"
                 }
                 catch
@@ -169,7 +169,7 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
                         description         = $ExpiredCred.description
                         TimeGenerated       = $ExpiredCred.TimeGenerated
                         status              = $ExpiredCred.status
-                        owners              = $ExpiredCred.owners
+                        owners              = $ExpiredCred.ownersgit
                     }
                  
     }
