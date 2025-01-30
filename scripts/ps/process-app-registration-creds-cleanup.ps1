@@ -169,7 +169,7 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
                         description         = $ExpiredCred.description
                         TimeGenerated       = $ExpiredCred.TimeGenerated
                         status              = $ExpiredCred.status
-                        owners              = $ExpiredCred.ownersgit
+                        owners              = $ExpiredCred.owners
                     }
                  
     }
