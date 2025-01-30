@@ -103,9 +103,7 @@ function GenerateCredentials() {
         }
     }
     # Store expired certs as a variable
-    # Could add logic to only count expired creds over 30 days? Just as a precaution
     $ExpiredCerts = $CertApp | where {$_.status -EQ "Expired"}
-    #Write-Host "$($ExpiredCerts.Count) Expired Certificates Found."
 
     # Retrieve secrets
     $SecretApp = foreach ($App in $ClientSecretApps){
@@ -136,10 +134,8 @@ function GenerateCredentials() {
     # Store expired secrets as a variable
     # Added logic to only count expired creds over 30 days, just as a precaution
     $ExpiredSecrets = $SecretApp | where {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
-    #Write-Host "$($ExpiredSecrets.Count) Expired Secrets Found."
     
     # Combine expired credentials
-    #$ExpiredCreds = $ExpiredCerts + $ExpiredSecrets
     $ExpiredCerts + $ExpiredSecrets
     
 }
@@ -147,14 +143,13 @@ function GenerateCredentials() {
 function RemoveExpiredCredentials {
 
 $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
-#$ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration
 
     $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
+            $ErrorActionPreference = "stop"
             try
-                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -WhatIf
-                #Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
-                $removal = $?
+                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
+                $removal = "Removed"
                 }
                 catch
                 {
@@ -215,7 +210,7 @@ Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials 
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
-$RemovedCredsJSON = ConvertTo-Json@($RemovedCreds)
+$RemovedCredsJSON = ConvertTo-Json @($RemovedCreds)
 
 Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $RemovedCredsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
