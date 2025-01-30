@@ -147,8 +147,8 @@ $ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
     $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
             $ErrorActionPreference = "stop"
-            try
-                {Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid
+            try {
+                Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -ErrorAction stop
                 $removal = "Removed"
                 }
                 catch
