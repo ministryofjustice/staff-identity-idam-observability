@@ -44,8 +44,7 @@ resource "azurerm_role_definition" "assign_identity_automation_account_applicati
   description = "Used to allow the IdAM Managed Identity to update app registration credentials."
 
   permissions {
-    actions = ["Microsoft.Directory/applications/credentials/update",
-    ]
+    actions = ["Microsoft.Directory/applications/credentials/update"]
     not_actions = []
   }
 
