@@ -38,29 +38,25 @@ resource "azurerm_role_assignment" "assign_identity_dcr_cleanup_monitoring_publi
   ]
 }
 
-resource "azurerm_role_definition" "assign_identity_automation_account_application_update" {
-  name        = "Application Credentials Updater"
-  scope       = data.azurerm_subscription.primary.id
-  description = "Used to allow the IdAM Managed Identity to update app registration credentials."
+resource "azuread_custom_role_definition" "assign_identity_automation_account_application_update" {
+  display_name = "Application Credentials Updater"
+  description  = "Used to allow the IdAM Managed Identity to update app registration credentials."
+  enabled      = true
+  version      = "1.0"
 
   permissions {
-    actions = ["Microsoft.Directory/applications/credentials/update"]
-    not_actions = []
+    allowed_resource_actions = ["microsoft.directory/applications/credentials/update"]
   }
-
-  assignable_scopes = [
-    data.azurerm_subscription.primary.id
-  ]
 }
 
-resource "azurerm_role_assignment" "assign_identity_application_updater" {
-  scope                = data.azurerm_subscription.primary.id
-  role_definition_name = "Application Credentials Updater"
-  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
-
-  depends_on = [
-    azurerm_user_assigned_identity.managed_identity,
-    azurerm_automation_account.automation_account,
-    azurerm_role_definition.assign_identity_automation_account_application_update
-  ]
-}
+#resource "azurerm_role_assignment" "assign_identity_application_updater" {
+#  scope                = data.azurerm_subscription.primary.id
+#  role_definition_name = "Application Credentials Updater"
+#  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+#
+#  depends_on = [
+#    azurerm_user_assigned_identity.managed_identity,
+#    azurerm_automation_account.automation_account,
+#    azuread_custom_role_definition.assign_identity_automation_account_application_update
+#  ]
+#}
