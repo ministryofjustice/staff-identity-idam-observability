@@ -38,7 +38,7 @@ resource "azurerm_role_assignment" "assign_identity_dcr_cleanup_monitoring_publi
   ]
 }
 
-resource "azuread_custom_role_definition" "assign_identity_automation_account_application_update" {
+resource "azuread_custom_directory_role" "assign_identity_automation_account_application_update" {
   display_name = "Application Credentials Updater"
   description  = "Used to allow the IdAM Managed Identity to update app registration credentials."
   enabled      = true
