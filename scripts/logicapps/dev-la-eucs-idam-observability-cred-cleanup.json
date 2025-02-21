@@ -51,7 +51,7 @@
                     "body": {
                         "To": "IDAMTeam@justice.gov.uk",
                         "Subject": "DEVL - expired credentials removed",
-                        "Body": "<p class=\"editor-paragraph\">The following expired credentials have been removed by the credential cleanup runbook</p><br><p class=\"editor-paragraph\">@{base64ToString(body('Run_query_and_visualize_results')?['body'])}</p><br><br>",
+                        "Body": "<p class=\"editor-paragraph\">The following expired credentials have been removed by the credential cleanup runbook</p><br><p class=\"editor-paragraph\">@{base64ToString(body('Run_query_and_visualize_results')?['body'])}<br><br>To retrieve additional info, or view older logs please check the log analytics workspace as per below<br>eucs_idam_observability_creds_cleanup_logs_CL | sort by TimeGenerated</p>",
                         "From": "IDAM@justice.gov.uk",
                         "Importance": "Normal"
                     },
