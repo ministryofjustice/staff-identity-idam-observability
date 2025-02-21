@@ -1,0 +1,115 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Day",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "hours": [
+                            "8"
+                        ],
+                        "minutes": [
+                            15
+                        ]
+                    }
+                },
+                "evaluatedRecurrence": {
+                    "interval": 1,
+                    "frequency": "Day",
+                    "timeZone": "GMT Standard Time",
+                    "schedule": {
+                        "hours": [
+                            "8"
+                        ],
+                        "minutes": [
+                            15
+                        ]
+                    }
+                },
+                "type": "Recurrence"
+            }
+        },
+        "actions": {
+            "Send_an_email_(V2)": {
+                "runAfter": {
+                    "Run_query_and_visualize_results": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['office365']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": {
+                        "To": "IDAMTeam@justice.gov.uk",
+                        "Subject": "DEVL - expired credentials removed",
+                        "Body": "<p class=\"editor-paragraph\">The following expired credentials have been removed by the credential cleanup runbook</p><br><p class=\"editor-paragraph\">@{base64ToString(body('Run_query_and_visualize_results')?['body'])}</p><br><br>",
+                        "From": "IDAM@justice.gov.uk",
+                        "Importance": "Normal"
+                    },
+                    "path": "/v2/Mail"
+                }
+            },
+            "Run_query_and_visualize_results": {
+                "runAfter": {},
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": "eucs_idam_observability_creds_cleanup_logs_CL | project TimeGenerated,displayname,cleanup,credtype,status,enddate,owners | sort by TimeGenerated",
+                    "path": "/visualizeQuery",
+                    "queries": {
+                        "subscriptions": "6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86",
+                        "resourcegroups": "rg-eucs-idam-observability",
+                        "resourcetype": "Log Analytics Workspace",
+                        "resourcename": "log-eucsidamobservability",
+                        "timerange": "Last 24 hours",
+                        "visType": "Html Table"
+                    }
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "type": "Object",
+            "value": {
+                "office365": {
+                    "id": "/subscriptions/6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86/providers/Microsoft.Web/locations/uksouth/managedApis/office365",
+                    "connectionId": "/subscriptions/6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/office365",
+                    "connectionName": "office365"
+                },
+                "azuremonitorlogs": {
+                    "id": "/subscriptions/6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86/providers/Microsoft.Web/locations/uksouth/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.Web/connections/azuremonitorlogs-1",
+                    "connectionName": "azuremonitorlogs-1",
+                    "connectionProperties": {
+                        "authentication": {
+                            "type": "ManagedServiceIdentity",
+                            "identity": "/subscriptions/6d5d7ebc-2b02-46ab-a77d-7b1a35ed0b86/resourceGroups/rg-eucs-idam-observability/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-eucs-idam-observability"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
