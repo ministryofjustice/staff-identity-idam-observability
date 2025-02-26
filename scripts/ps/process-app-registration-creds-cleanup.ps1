@@ -142,7 +142,7 @@ function GenerateCredentials() {
 
 function RemoveExpiredCredentials {
 
-$ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 1
+$ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 15
 
     $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
