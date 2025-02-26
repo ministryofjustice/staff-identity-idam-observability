@@ -25,6 +25,17 @@ resource "azurerm_automation_schedule" "automation_schedule" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-01-15T07:00:00+01:00"
+  start_time              = "2025-01-26T07:00:00+01:00"
   description             = "Run export daily."
+}
+
+resource "azurerm_automation_schedule" "automation_schedule_cleanup" {
+  name                    = "as-${var.department}-${var.team}-${var.project}-cleanup"
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  frequency               = "Day"
+  interval                = 14
+  timezone                = "Europe/London"
+  start_time              = "2025-03-10T07:00:00+01:00"
+  description             = "Run cleanup every 2 weeks."
 }
