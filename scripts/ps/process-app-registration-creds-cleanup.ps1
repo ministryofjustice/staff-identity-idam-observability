@@ -136,7 +136,7 @@ function GenerateCredentials() {
     $ExpiredSecrets = $SecretApp | where {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
     
     # Combine expired credentials
-    $ExpiredCerts + $ExpiredSecrets
+    [array]$ExpiredCerts + $ExpiredSecrets
     
 }
 
