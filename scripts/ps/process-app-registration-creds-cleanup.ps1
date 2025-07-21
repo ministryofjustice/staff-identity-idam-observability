@@ -103,7 +103,7 @@ function GenerateCredentials() {
         }
     }
     # Store expired certs as a variable
-    $ExpiredCerts = $CertApp | where {$_.status -EQ "Expired"}
+    $ExpiredCerts = $CertApp | Where-Object {$_.status -EQ "Expired"}
 
     # Retrieve secrets
     $SecretApp = foreach ($App in $ClientSecretApps){
@@ -133,7 +133,7 @@ function GenerateCredentials() {
     }
     # Store expired secrets as a variable
     # Added logic to only count expired creds over 30 days, just as a precaution
-    $ExpiredSecrets = $SecretApp | where {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
+    $ExpiredSecrets = $SecretApp | Where-Object {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
     
     # Combine expired credentials
     [array]$ExpiredCerts + $ExpiredSecrets
@@ -142,13 +142,13 @@ function GenerateCredentials() {
 
 function RemoveExpiredCredentials {
 
-$ExpiredCredsTrimmed = $ExpiredCreds | sort daystoexpiration | select -First 15
+$ExpiredCredsTrimmed = $ExpiredCreds | Sort-Object daystoexpiration | Select-Object -First 15
 
     $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
             $ErrorActionPreference = "stop"
             try {
-                Remove-AzADAppCredential -DisplayName $ExpiredCred.displayname -KeyId $ExpiredCred.keyid -ErrorAction stop
+                Remove-AzADAppCredential -ApplicationId $ExpiredCred.applicationid -KeyId $ExpiredCred.keyid -ErrorAction stop
                 $removal = "Removed"
                 }
                 catch
