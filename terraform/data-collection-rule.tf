@@ -204,55 +204,35 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
   stream_declaration {
     stream_name = "Custom-${azapi_resource.workspaces_table_access_package_info.name}"
     column {
-      name = "displayname"
+      name = "Catalog"
       type = "string"
     }
     column {
-      name = "cleanup"
+      name = "AccessPackage"
       type = "string"
     }
     column {
-      name = "applicationid"
+      name = "GroupDisplayname"
       type = "string"
     }
     column {
-      name = "credtype"
+      name = "RoleName"
       type = "string"
     }
     column {
-      name = "startdate"
+      name = "AssignmentType"
       type = "datetime"
     }
     column {
-      name = "enddate"
+      name = "RoleStatus"
       type = "datetime"
     }
     column {
-      name = "daystoexpiration"
+      name = "GroupOwners"
       type = "int"
     }
     column {
-      name = "objectid"
-      type = "string"
-    }
-    column {
-      name = "keyid"
-      type = "string"
-    }
-    column {
-      name = "description"
-      type = "string"
-    }
-    column {
-      name = "TimeGenerated"
-      type = "datetime"
-    }
-    column {
-      name = "status"
-      type = "string"
-    }
-    column {
-      name = "owners"
+      name = "AccessReviewers"
       type = "string"
     }
   }
