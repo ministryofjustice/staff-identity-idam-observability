@@ -221,15 +221,15 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
     }
     column {
       name = "AssignmentType"
-      type = "datetime"
+      type = "string"
     }
     column {
       name = "RoleStatus"
-      type = "datetime"
+      type = "string"
     }
     column {
       name = "GroupOwners"
-      type = "int"
+      type = "string"
     }
     column {
       name = "AccessReviewers"
