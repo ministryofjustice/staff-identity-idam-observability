@@ -17,6 +17,8 @@ param(
     [string]$TenantId,
     [string]$clientId,
     [string]$clientSecret,
+    [string]$DcrImmutableId,
+    [string]$DceUri,
     [string]$LogTableName
 )
 
