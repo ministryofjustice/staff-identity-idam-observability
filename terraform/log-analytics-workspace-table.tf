@@ -64,6 +64,60 @@ resource "azapi_resource" "workspaces_table" {
   ]
 }
 
+resource "azapi_resource" "workspaces_table_access_package_info" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_AccessPackage_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_AccessPackage_CL",
+        columns = [
+          {
+            name = "Catalog",
+            type = "string"
+          },
+          {
+            name = "AccessPackage",
+            type = "string"
+          },
+          {
+            name = "GroupDisplayname",
+            type = "string"
+          },
+          {
+            name = "RoleName",
+            type = "string"
+          },
+          {
+            name = "AssignmentType",
+            type = "string"
+          },
+          {
+            name = "RoleStatus",
+            type = "string"
+          },
+          {
+            name = "GroupOwners",
+            type = "string"
+          },
+          {
+            name = "AccessReviewers",
+            type = "string"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
+
 resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
   name      = "${var.department}_${var.team}_${var.project}_creds_cleanup_logs_CL"

@@ -173,3 +173,75 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_cleanup" {
 
   tags = local.tags
 }
+
+resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPackage" {
+  name                        = "dcr-${var.department}-${var.team}-${var.project}-AccessPackage"
+  location                    = var.location
+  resource_group_name         = local.rg_name
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.id
+
+  destinations {
+    log_analytics {
+      workspace_resource_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+      name                  = azurerm_log_analytics_workspace.log_analytics_workspace.name
+    }
+  }
+
+  data_flow {
+    streams       = ["Custom-${azapi_resource.workspaces_table_access_package_info.name}"]
+    destinations  = [azurerm_log_analytics_workspace.log_analytics_workspace.name]
+    transform_kql = "source"
+    output_stream = "Custom-${azapi_resource.workspaces_table_access_package_info.name}"
+  }
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.managed_identity.id
+    ]
+  }
+
+  stream_declaration {
+    stream_name = "Custom-${azapi_resource.workspaces_table_access_package_info.name}"
+    column {
+      name = "Catalog"
+      type = "string"
+    }
+    column {
+      name = "AccessPackage"
+      type = "string"
+    }
+    column {
+      name = "GroupDisplayname"
+      type = "string"
+    }
+    column {
+      name = "RoleName"
+      type = "string"
+    }
+    column {
+      name = "AssignmentType"
+      type = "string"
+    }
+    column {
+      name = "RoleStatus"
+      type = "string"
+    }
+    column {
+      name = "GroupOwners"
+      type = "string"
+    }
+    column {
+      name = "AccessReviewers"
+      type = "string"
+    }
+  }
+
+  description = "Data collection rule for Access Package info"
+  depends_on = [
+    azapi_resource.workspaces_table_access_package_info,
+    azurerm_monitor_data_collection_endpoint.data_collection_endpoint
+  ]
+
+  tags = local.tags
+}
