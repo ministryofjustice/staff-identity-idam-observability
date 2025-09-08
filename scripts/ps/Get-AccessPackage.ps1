@@ -15,7 +15,7 @@ Import-Module Microsoft.Graph.Groups
 #Authentication to MS Graph
 param(
     [string]$TenantId,
-    [string]$clientId,
+    [string]$MIclientId,
     [string]$clientSecret,
     [string]$DcrImmutableId,
     [string]$DceUri,
@@ -26,11 +26,6 @@ param(
 function Write-LogInfo($logentry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
 }
-
-$SecuredPasswordPassword = ConvertTo-SecureString -String $clientSecret -AsPlainText -Force
-$ClientSecretCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $clientId, $SecuredPasswordPassword
-
-Connect-MgGraph -TenantId $tenantId -ClientSecretCredential $ClientSecretCredential
 
 # Post data function
 function PostLogAnalyticsData()
@@ -284,6 +279,29 @@ function Get-AccessReviewGroups {
 
 
 # --- Run Everything ---
+Write-LogInfo("Script execution started")
+
+try 
+{
+    Write-LogInfo("Authenticate to Azure")
+    # Ensures you do not inherit an AzContext in your runbook
+    Disable-AzContextAutosave -Scope Process
+
+    # Connect to Azure with user-assigned managed identity
+    Connect-AzAccount -Identity -AccountId $MiClientId
+
+    $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
+    $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
+
+    Connect-MgGraph -Identity -ClientId $MiClientId
+    Write-LogInfo("Context is $context")
+} 
+catch 
+{
+  write-error "$($_.Exception)"
+  throw "$($_.Exception)"
+}
+
 $groupsDictionary = Get-GroupsDictionary
 $getAllAccessPackagesWithResources = Get-ResourcesFromAccessPackages -GroupDictionary $groupsDictionary
 
@@ -362,27 +380,7 @@ $mergedExport = foreach ($entry in $getAllAccessPackagesWithResources) {
 }
 ###$ JUST FOR TESTING OUTPUT###mergedExport | ForEach-Object { $_ } | Export-Csv -Path "$ExportToExcelPath\AccessPackageResourcesWithRoles.csv" -NoTypeInformation
 
-# Authenticate with the credentials object
-try 
-{
-    Write-LogInfo("Authenticate to Azure")
-    # Ensures you do not inherit an AzContext in your runbook
-    Disable-AzContextAutosave -Scope Process
 
-    # Connect to Azure with user-assigned managed identity
-    Connect-AzAccount -Identity -AccountId $MiClientId
-
-    $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
-    $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
-
-    Connect-MgGraph -Identity -ClientId $MiClientId
-    Write-LogInfo("Context is $context")
-} 
-catch 
-{
-  write-error "$($_.Exception)"
-  throw "$($_.Exception)"
-}
 
 ### JUST FOR TESTING Testing##$ExportToExcelPath = 
 ###$ JUST FOR TESTING OUTPUT###mergedExport | ForEach-Object { $_ } | Export-Csv -Path "$ExportToExcelPath\AccessPackageResourcesWithRoles.csv" -NoTypeInformation
