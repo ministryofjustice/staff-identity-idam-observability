@@ -40,7 +40,7 @@ data "local_file" "Access_Package_info_script" {
   filename = "${path.module}/../scripts/ps/Get-AccessPackage.ps1"
 }
 
-resource "azurerm_automation_runbook" "runbook_app_registrations_info_script" {
+resource "azurerm_automation_runbook" "runbook_Access_Package_info_script" {
   name                    = "rb-${var.department}-${var.team}-${var.project}-AccessPackage-info"
   location                = var.location
   resource_group_name     = local.rg_name
