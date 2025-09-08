@@ -360,14 +360,9 @@ $mergedExport = foreach ($entry in $getAllAccessPackagesWithResources) {
         foreach ($role in $matchingRoles) {
             [PSCustomObject][Ordered]@{
                 Catalog           = $entry.Catalog
-                #CatalogID         = $entry.CatalogID
                 AccessPackage     = $entry.AccessPackage
-                #AccessPackageID   = $entry.AccessPackageID
                 GroupDisplayname  = $entry.GroupDisplayname
-                #GroupID           = $entry.GroupID
                 RoleName          = $role.RoleName
-                #RoleDescription   = $role.RoleDescription
-                #Scope             = $role.Scope
                 AssignmentType    = $role.AssignmentType
                 RoleStatus        = $role.RoleStatus
                 GroupOwners       = $ownerNames
@@ -387,7 +382,3 @@ $mergedExport = foreach ($entry in $getAllAccessPackagesWithResources) {
 #Convert the $mergedExport to JSON to send it to Log analytics
 $JSONMergedExport = $mergedExport | ConvertTo-Json
 PostLogAnalyticsData -logBody $JSONMergedExport -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
-
-
-
