@@ -14,9 +14,7 @@ Import-Module Microsoft.Graph.Groups
 #Using EUCS-IDAM-AccessPackage-Analytics-Test
 #Authentication to MS Graph
 param(
-    [string]$TenantId,
     [string]$MIclientId,
-    [string]$clientSecret,
     [string]$DcrImmutableId,
     [string]$DceUri,
     [string]$LogTableName
