@@ -36,7 +36,7 @@ resource "azurerm_automation_runbook" "runbook_creds_cleanup_script" {
   tags = local.tags
 }
 
-data "local_file" "app_registrations_info_script" {
+data "local_file" "Access_Package_info_script" {
   filename = "${path.module}/../scripts/ps/Get-AccessPackage.ps1"
 }
 
@@ -50,7 +50,7 @@ resource "azurerm_automation_runbook" "runbook_app_registrations_info_script" {
   description             = "Extracts details from MSGraph about Access package owners, roles and reviewers."
   runbook_type            = "PowerShell72"
 
-  content = data.local_file.app_registrations_info_script.content
+  content = data.local_file.Access_Package_info_script.content
 
   tags = local.tags
 }
