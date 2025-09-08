@@ -235,6 +235,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       name = "AccessReviewers"
       type = "string"
     }
+    column {
+      name = "TimeGenerated"
+      type = "datetime"
+    }
   }
 
   description = "Data collection rule for Access Package info"
