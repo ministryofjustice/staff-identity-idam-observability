@@ -76,47 +76,35 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
         name = "${var.department}_${var.team}_${var.project}_AccessPackage_CL",
         columns = [
           {
-            name = "displayname",
+            name = "Catalog",
             type = "string"
           },
           {
-            name = "objectid",
+            name = "AccessPackage",
             type = "string"
           },
           {
-            name = "applicationid",
+            name = "GroupDisplayname",
             type = "string"
           },
           {
-            name = "keyid",
+            name = "RoleName",
             type = "string"
           },
           {
-            name = "eventtype",
+            name = "AssignmentType",
             type = "string"
           },
           {
-            name = "startdate",
-            type = "dateTime"
-          },
-          {
-            name = "enddate",
-            type = "dateTime"
-          },
-          {
-            name = "status",
+            name = "RoleStatus",
             type = "string"
           },
           {
-            name = "TimeGenerated",
-            type = "dateTime"
+            name = "GroupOwners",
+            type = "string"
           },
           {
-            name = "daystoexpiration",
-            type = "int"
-          },
-          {
-            name = "owners",
+            name = "AccessReviewers",
             type = "string"
           }
         ]
