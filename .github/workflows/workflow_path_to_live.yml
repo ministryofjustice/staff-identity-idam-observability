@@ -30,7 +30,7 @@ jobs:
   terraform_plan_workflow:
     strategy:
       matrix:
-        environment: ["DEVL", "NLE", "LIVE"]
+        environment: ["DEVL", "NLE", "LIVE", "DEVLEXTERNAL"]
     name: TF Plan ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_plan_job.yml
     with:
@@ -49,7 +49,7 @@ jobs:
   terraform_apply_workflow:
     strategy:
       matrix:
-        environment: ["DEVL", "NLE", "LIVE"]
+        environment: ["DEVL", "NLE", "LIVE", "DEVLEXTERNAL"]
     needs: [terraform_plan_workflow]
     name: TF Apply ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_apply_job.yml
