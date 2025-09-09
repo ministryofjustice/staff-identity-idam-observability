@@ -31,7 +31,7 @@ jobs:
   terraform_plan_workflow:
     strategy:
       matrix:
-        environment: ["DEVL", "NLE", "LIVE", "DEVLEXTERNAL"]
+        environment: ["DEVL", "NLE", "LIVE", "DEVLEXTERNAL", "NLEEXTERNAL", "LIVEEXTERNAL"]
     name: TF Plan ${{ matrix.environment }}
     uses: ./.github/workflows/terraform_plan_job.yml
     with:
