@@ -191,3 +191,81 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
     azurerm_log_analytics_workspace.log_analytics_workspace
   ]
 }
+
+resource "azapi_resource" "workspaces_table_guest_users" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_GuestUsers_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_GuestUsers_CL",
+        columns = [
+          {
+            name = "displayname",
+            type = "string"
+          },
+          {
+            name = "objectid",
+            type = "string"
+          },
+          {
+            name = "mail",
+            type = "string"
+          },
+          {
+            name = "userPrincipleName",
+            type = "string"
+          },
+          {
+            name = "accountEnabled",
+            type = "bool"
+          },
+          {
+            name = "createdDateTime",
+            type = "dateTime"
+          },
+          {
+            name = "externalUserState",
+            type = "string"
+          },
+          {
+            name = "lastLoginDate",
+            type = "dateTime"
+          },
+          {
+            name = "daysSinceInvitedAndNotRegistered",
+            type = "int"
+          },
+          {
+            name = "isInactiveAfterPolicyDays",
+            type = "bool"
+          },
+          {
+            name = "isNotActiveAfterPolicyDays",
+            type = "bool"
+          },
+          {
+            name = "isInactiveAfterExternalPolicyDays",
+            type = "bool"
+          },
+          {
+            name = "isNotActiveAfterExternalPolicyDays",
+            type = "bool"
+          },
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}

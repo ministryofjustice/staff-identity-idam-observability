@@ -18,6 +18,10 @@ output "dcr_immutable_cleanup_id" {
   value = azurerm_monitor_data_collection_rule.data_collection_rule_cleanup.immutable_id
 }
 
+output "dcr_immutable_guest_users_id" {
+  value = azurerm_monitor_data_collection_rule.data_collection_rule_guest_users.immutable_id
+}
+
 output "log_table_name" {
   value = azapi_resource.workspaces_table.name
 }
