@@ -236,6 +236,10 @@ resource "azapi_resource" "workspaces_table_guest_users" {
             type = "dateTime"
           },
           {
+            name = "hasLoggedIn",
+            type = "bool"
+          },
+          {
             name = "daysSinceInvitedAndNotRegistered",
             type = "int"
           },

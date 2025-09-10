@@ -312,6 +312,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
       type = "dateTime"
     }
     column {
+      name = "hasLoggedIn"
+      type = "bool"
+    }
+    column {
       name = "daysSinceInvitedAndNotRegistered"
       type = "int"
     }
