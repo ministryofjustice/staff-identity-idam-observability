@@ -324,7 +324,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
       type = "bool"
     }
     column {
-      name = "isNotActiveAfterPolicyDays"
+      name = "isNotActivatedAfterPolicyDays"
       type = "bool"
     }
     column {
@@ -332,8 +332,12 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
       type = "bool"
     }
     column {
-      name = "isNotActiveAfterExternalPolicyDays"
+      name = "isNotActivatedAfterExternalPolicyDays"
       type = "bool"
+    }
+    column {
+      name = "notActivatedAfterPolicyDays"
+      type = "int"
     }
     column {
       name = "TimeGenerated"
