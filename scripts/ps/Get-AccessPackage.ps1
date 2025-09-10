@@ -5,14 +5,6 @@
     .DESCRIPTION
     Leverage Microsoft Graph API and PowerShell to fetch a list Catalogs, Access packages and groups #>
 
-
-    
-#Importing required modules
-Import-Module microsoft.graph.beta.Identity.Governance
-import-module Microsoft.Graph.Identity.Governance
-Import-Module Microsoft.Graph.Groups
-#Using EUCS-IDAM-AccessPackage-Analytics-Test
-#Authentication to MS Graph
 param(
     [string]$MIclientId,
     [string]$DcrImmutableId,
