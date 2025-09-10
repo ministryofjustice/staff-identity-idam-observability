@@ -244,6 +244,10 @@ resource "azapi_resource" "workspaces_table_guest_users" {
             type = "int"
           },
           {
+            name = "daysInactive",
+            type = "int"
+          },
+          {
             name = "isInactiveAfterPolicyDays",
             type = "bool"
           },
