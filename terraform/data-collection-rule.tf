@@ -297,7 +297,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
     }
     column {
       name = "accountEnabled"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "createdDateTime"
@@ -309,11 +309,11 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
     }
     column {
       name = "lastLoginDate"
-      type = "dateTime"
+      type = "datetime"
     }
     column {
       name = "hasLoggedIn"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "daysSinceInvitedAndNotRegistered"
@@ -325,19 +325,19 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
     }
     column {
       name = "isInactiveAfterPolicyDays"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "isNotActivatedAfterPolicyDays"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "isInactiveAfterExternalPolicyDays"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "isNotActivatedAfterExternalPolicyDays"
-      type = "bool"
+      type = "boolean"
     }
     column {
       name = "notActivatedAfterPolicyDays"
