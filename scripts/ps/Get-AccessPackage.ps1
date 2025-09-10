@@ -5,10 +5,6 @@
     .DESCRIPTION
     Leverage Microsoft Graph API and PowerShell to fetch a list Catalogs, Access packages and groups #>
 
-
-    
-
-#Authentication to MS Graph
 param(
     [string]$MIclientId,
     [string]$DcrImmutableId,
