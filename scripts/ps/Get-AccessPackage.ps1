@@ -7,11 +7,7 @@
 
 
     
-#Importing required modules
-Import-Module microsoft.graph.beta.Identity.Governance
-import-module Microsoft.Graph.Identity.Governance
-Import-Module Microsoft.Graph.Groups
-#Using EUCS-IDAM-AccessPackage-Analytics-Test
+
 #Authentication to MS Graph
 param(
     [string]$MIclientId,
