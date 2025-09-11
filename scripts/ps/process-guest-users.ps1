@@ -81,39 +81,45 @@ $users = Get-MgUser -Filter "userType eq 'Guest'" -All -Property ID, DisplayName
 
 Write-LogInfo("Update User Objects.")
 
-foreach ($user in $users) {
+$usersList = foreach ($user in $users) {
 
-    $externalUserState = $user.ExternalUserState
-    $createdDateTime = $user.CreatedDateTime
     $LastLoginDate = $user.SignInActivity.LastSignInDateTime
-    $user | Add-Member -MemberType NoteProperty -Name LastLoginDate -Value $LastLoginDate -Force
-    $user.PSObject.Properties.Remove('SignInActivity')
 
     $DaysInactive = GetDaysInactive($LastLoginDate);
 
-    $notActivatedAfterPolicyDays = $null
-    if ("PendingAcceptance" -ne $externalUserState) {
-        $notActivatedAfterPolicyDays = 0
-    } else {
-        $notActivatedAfterPolicyDays = ((Get-Date) - ($createdDateTime) | Select-Object -ExpandProperty TotalDays) -as [int]
+    $daysSinceInvitedAndNotRegistered = $null
+    if ("PendingAcceptance" -ne $user.ExternalUserState) {
+        $daysSinceInvitedAndNotRegistered = 0
     }
-    
-    $user | Add-Member -MemberType NoteProperty -Name HasLoggedIn -Value ($LastLoginDate ? $True : $False) -Force
-    $user | Add-Member -MemberType NoteProperty -Name DaysSinceInvitedAndNotRegistered -Value 1 -Force
-    $user | Add-Member -MemberType NoteProperty -Name DaysInactive -Value $DaysInactive -Force
-    $user | Add-Member -MemberType NoteProperty -Name IsInactiveAfterPolicyDays  -Value (($DaysInactive -gt 90) ? $True : $False) -Force # 3 Months
-    $user | Add-Member -MemberType NoteProperty -Name NotActivatedAfterPolicyDays -Value $notActivatedAfterPolicyDays -Force
-    $user | Add-Member -MemberType NoteProperty -Name IsNotActivatedAfterPolicyDays -Value (($notActivatedAfterPolicyDays -gt 30) ? $True : $False) -Force
-    $user | Add-Member -MemberType NoteProperty -Name IsInactiveAfterExternalPolicyDays -Value (($DaysInactive -gt 395) ? $True : $False) -Force # 13 Months
-    $user | Add-Member -MemberType NoteProperty -Name IsNotActivatedAfterExternalPolicyDays -Value (($notActivatedAfterPolicyDays -gt 30) ? $True : $False) -Force
+    else {
+        $daysSinceInvitedAndNotRegistered = ((Get-Date) - ($user.CreatedDateTime) | Select-Object -ExpandProperty TotalDays) -as [int]
+    }
 
+    [PSCustomObject]@{
+        displayname                           = $user.DisplayName
+        objectid                              = $user.ID
+        mail                                  = $user.Mail
+        userPrincipleName                     = $user.UserPrincipalName
+        accountEnabled                        = $user.AccountEnabled
+        createdDateTime                       = $user.CreatedDateTime
+        externalUserState                     = $user.ExternalUserState
+        lastLoginDate                         = $LastLoginDate
+        hasLoggedIn                           = ($LastLoginDate ? $True : $False)
+        daysSinceInvitedAndNotRegistered      = $daysSinceInvitedAndNotRegistered
+        daysInactive                          = $DaysInactive
+        isInactiveAfterPolicyDays             = (($DaysInactive -gt 90) ? $True : $False)
+        isdaysSinceInvitedAndNotRegistered    = (($daysSinceInvitedAndNotRegistered -gt 30) ? $True : $False)
+        isInactiveAfterExternalPolicyDays     = (($DaysInactive -gt 395) ? $True : $False)
+        isNotActivatedAfterExternalPolicyDays = (($daysSinceInvitedAndNotRegistered -gt 30) ? $True : $False)
+        TimeGenerated                         = $timeStamp
+    }    
 }
 
-Write-LogInfo("$(([PSObject[]]($users)).Count) Total Users Found.")
+Write-LogInfo("$(([PSObject[]]($usersList)).Count) Total Users Found.")
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Users list to JSON")
-$splitAt = [Math]::Round($guestUserDetails.Count / 10)
+$splitAt = [Math]::Round($usersList.Count / 10)
 $guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10 = $guestUserDetails.Where(
  { $_ },
  'Split', $splitAt

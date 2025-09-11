@@ -340,10 +340,6 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
       type = "boolean"
     }
     column {
-      name = "notActivatedAfterPolicyDays"
-      type = "int"
-    }
-    column {
       name = "TimeGenerated"
       type = "datetime"
     }

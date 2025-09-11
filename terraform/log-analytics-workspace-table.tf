@@ -264,10 +264,6 @@ resource "azapi_resource" "workspaces_table_guest_users" {
             type = "bool"
           },
           {
-            name = "notActivatedAfterPolicyDays",
-            type = "int"
-          },
-          {
             name = "TimeGenerated",
             type = "dateTime"
           }
