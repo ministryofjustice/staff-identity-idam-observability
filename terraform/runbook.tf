@@ -54,3 +54,22 @@ resource "azurerm_automation_runbook" "runbook_Access_Package_info_script" {
 
   tags = local.tags
 }
+
+data "local_file" "app_registrations_guest_users_script" {
+  filename = "${path.module}/../scripts/ps/process-guest-users.ps1"
+}
+
+resource "azurerm_automation_runbook" "runbook_guest_users_script" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-guest-users-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Extracts Guest User details."
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.app_registrations_guest_users_script.content
+
+  tags = local.tags
+}
