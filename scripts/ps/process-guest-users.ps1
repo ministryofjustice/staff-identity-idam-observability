@@ -120,7 +120,7 @@ Write-LogInfo("$(([PSObject[]]($usersList)).Count) Total Users Found.")
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Users list to JSON")
 $splitAt = [Math]::Round($usersList.Count / 10)
-$guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10 = $guestUserDetails.Where(
+$guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10 = $usersList.Where(
  { $_ },
  'Split', $splitAt
 )
