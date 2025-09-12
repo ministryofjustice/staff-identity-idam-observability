@@ -59,5 +59,5 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   interval                = 14
   timezone                = "Europe/London"
   start_time              = "2025-09-13T07:00:00+01:00"
-  description             = "Run cleanup every 2 weeks."
+  description             = "Run AccessPackage runbook every 2 weeks."
 }
