@@ -117,7 +117,7 @@ Write-LogInfo("$(([PSObject[]]($usersList)).Count) Total Users Found.")
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Users list to JSON")
 $splitAt = [Math]::Round($usersList.Count / 10)
-$guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10 = $usersList.Where(
+$guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10, $guestUserDetails11, $guestUserDetails12, $guestUserDetails13, $guestUserDetails14, $guestUserDetails15 = $usersList.Where(
     { $_ },
     'Split', $splitAt
 )
@@ -132,26 +132,28 @@ $guestUserDetailsJSON7 = $guestUserDetails7 | ConvertTo-Json
 $guestUserDetailsJSON8 = $guestUserDetails8 | ConvertTo-Json
 $guestUserDetailsJSON9 = $guestUserDetails9 | ConvertTo-Json
 $guestUserDetailsJSON10 = $guestUserDetails10 | ConvertTo-Json
+$guestUserDetailsJSON11 = $guestUserDetails10 | ConvertTo-Json
+$guestUserDetailsJSON12 = $guestUserDetails10 | ConvertTo-Json
+$guestUserDetailsJSON13 = $guestUserDetails10 | ConvertTo-Json
+$guestUserDetailsJSON14 = $guestUserDetails10 | ConvertTo-Json
+$guestUserDetailsJSON15 = $guestUserDetails10 | ConvertTo-Json
 
 Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $guestUserDetailsJSON1 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON2 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON3 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON4 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON5 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON6 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON7 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON8 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON9 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
-
 PostLogAnalyticsData -logBody $guestUserDetailsJSON10 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON10 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON11 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON12 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON13 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON14 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+PostLogAnalyticsData -logBody $guestUserDetailsJSON15 -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
 
 Write-LogInfo("Script execution finished")
