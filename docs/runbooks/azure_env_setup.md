@@ -57,7 +57,7 @@ This will be required if when you run a job it returns an error saying the MI do
 
 ## Graph Package Dependencies
 
-The code in this repository requires version 2.5.0 of the Graph API. After this version, Connect-MgGraph fails to authenticate due to changes in the API. You should use the steps below when adding new dependecies rather than the built in Module Catalogue option.
+The code in this repository requires version 2.25.0 of the Graph API. After this version, Connect-MgGraph fails to authenticate due to changes in the API. You should use the steps below when adding new dependecies rather than the built in Module Catalogue option.
 
 If you need to add a new package, follow these steps
 
