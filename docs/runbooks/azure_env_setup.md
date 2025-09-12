@@ -48,3 +48,27 @@ Run your Terraform to setup the resources in your Resource Group.
 Go to Enterprise applications and find your App Registration. Assign the role Directory Reader to your Managed Identity to allow it to read all app registration details.
 
 We set this manually rather than through code, meaning we do not give the pipeline a higher set of permissions.
+
+## MI Roles
+
+The Managed Identity will require specific roles to be able to query data and make changes in the tenant. Go to Entra -> Roles & Administrators and assign the relevant permissions to enable it to work.
+
+This will be required if when you run a job it returns an error saying the MI does not have permission to xxx.Read.All for example.
+
+## Graph Package Dependencies
+
+The code in this repository requires version 2.5.0 of the Graph API. After this version, Connect-MgGraph fails to authenticate due to changes in the API. You should use the steps below when adding new dependecies rather than the built in Module Catalogue option.
+
+If you need to add a new package, follow these steps
+
+### Download to your machine the Graph library
+
+`Save-Module -Name Microsoft.Graph.Groups -RequiredVersion 2.25.0 -Path "C:\psmodules"`
+
+### Zip Folder
+
+Go to the directory you downloaded it to, right click the folder and Compress/Add to Zip file
+
+### Add module
+
+Go to the Modules section in the Automation Account, add new module and upload the Zip file choosing PowerShell version 7.2
