@@ -20,25 +20,24 @@ function Write-LogInfo($logentry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
 }
 
-function PostLogAnalyticsData()
-{   
+function PostLogAnalyticsData() {   
     param (
-        [Parameter(Mandatory=$true)][string]$logBody,
-        [Parameter(Mandatory=$true)][string]$dcrImmutableId,
-        [Parameter(Mandatory=$true)][string]$dceURI,
-        [Parameter(Mandatory=$true)][string]$table
-        )
+        [Parameter(Mandatory = $true)][string]$logBody,
+        [Parameter(Mandatory = $true)][string]$dcrImmutableId,
+        [Parameter(Mandatory = $true)][string]$dceURI,
+        [Parameter(Mandatory = $true)][string]$table
+    )
 
     # Retrieving bearer token for the system-assigned managed identity
     $bearerToken = (Get-AzAccessToken -ResourceUrl "https://monitor.azure.com").Token
 
     $headers = @{
         "Authorization" = "Bearer $bearerToken";
-        "Content-Type" = "application/json"
+        "Content-Type"  = "application/json"
     }
 
     $method = "POST"
-    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table"+"?api-version=2023-01-01";
+    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table" + "?api-version=2023-01-01";
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
@@ -54,8 +53,7 @@ Write-LogInfo("Script execution started")
 
 
 Write-LogInfo("Authenticate with the credentials object.")
-try 
-{
+try {
     Write-LogInfo("Authenticate to Azure")
     # Ensures you do not inherit an AzContext in your runbook
     Disable-AzContextAutosave -Scope Process
@@ -69,10 +67,9 @@ try
     Connect-MgGraph -Identity -ClientId $MiClientId
     Write-LogInfo("Context is $context")
 } 
-catch 
-{
-  write-error "$($_.Exception)"
-  throw "$($_.Exception)"
+catch {
+    write-error "$($_.Exception)"
+    throw "$($_.Exception)"
 }
 
 Write-LogInfo("Query Users with Get-MgUser.")
@@ -108,7 +105,7 @@ $usersList = foreach ($user in $users) {
         daysSinceInvitedAndNotRegistered      = $daysSinceInvitedAndNotRegistered
         daysInactive                          = $DaysInactive
         isInactiveAfterPolicyDays             = (($DaysInactive -gt 90) ? $True : $False)
-        isdaysSinceInvitedAndNotRegistered    = (($daysSinceInvitedAndNotRegistered -gt 30) ? $True : $False)
+        isNotActivatedAfterPolicyDays         = (($daysSinceInvitedAndNotRegistered -gt 30) ? $True : $False)
         isInactiveAfterExternalPolicyDays     = (($DaysInactive -gt 395) ? $True : $False)
         isNotActivatedAfterExternalPolicyDays = (($daysSinceInvitedAndNotRegistered -gt 30) ? $True : $False)
         TimeGenerated                         = $timeStamp
@@ -121,8 +118,8 @@ Write-LogInfo("$(([PSObject[]]($usersList)).Count) Total Users Found.")
 Write-LogInfo("Convert Users list to JSON")
 $splitAt = [Math]::Round($usersList.Count / 10)
 $guestUserDetails1, $guestUserDetails2, $guestUserDetails3, $guestUserDetails4, $guestUserDetails5, $guestUserDetails6, $guestUserDetails7, $guestUserDetails8, $guestUserDetails9, $guestUserDetails10 = $usersList.Where(
- { $_ },
- 'Split', $splitAt
+    { $_ },
+    'Split', $splitAt
 )
 
 $guestUserDetailsJSON1 = $guestUserDetails1 | ConvertTo-Json
