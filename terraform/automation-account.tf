@@ -25,7 +25,7 @@ resource "azurerm_automation_schedule" "automation_schedule" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-09-13T07:00:00+01:00"
+  start_time              = "2025-09-16T07:00:00+01:00"
   description             = "Run export daily."
 }
 
@@ -36,7 +36,7 @@ resource "azurerm_automation_schedule" "automation_schedule_cleanup" {
   frequency               = "Day"
   interval                = 14
   timezone                = "Europe/London"
-  start_time              = "2025-09-13T07:00:00+01:00"
+  start_time              = "2025-09-16T07:00:00+01:00"
   description             = "Run cleanup every 2 weeks."
 }
 
@@ -47,6 +47,17 @@ resource "azurerm_automation_schedule" "automation_schedule_guest_users" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-09-13T07:00:00+01:00"
+  start_time              = "2025-09-16T07:00:00+01:00"
   description             = "Run export daily."
+}
+
+resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
+  name                    = "as-${var.department}-${var.team}-${var.project}-access-package"
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  frequency               = "Day"
+  interval                = 14
+  timezone                = "Europe/London"
+  start_time              = "2025-09-16T07:00:00+01:00"
+  description             = "Run AccessPackage runbook every 2 weeks."
 }
