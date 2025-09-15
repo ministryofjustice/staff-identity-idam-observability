@@ -25,7 +25,24 @@ resource "azurerm_application_insights_workbook" "application_insights_workbook_
     {
       resourceGroup  = local.rg_name,
       workspaceName  = azurerm_log_analytics_workspace.log_analytics_workspace.name
-      tableName      = azapi_resource.workspaces_table.name,
+      tableName      = azapi_resource.workspaces_table_guest_users.name,
+      subscriptionId = var.subscription_id
+  })
+
+  tags = local.tags
+}
+
+resource "azurerm_application_insights_workbook" "application_insights_workbook_internal_guest_users" {
+  name                = "8eaea574-6ad6-407b-b5a0-4a9ba9b78e5d"
+  resource_group_name = local.rg_name
+  location            = var.location
+  display_name        = "Internal Guest Users"
+
+  data_json = templatefile("${path.module}/../scripts/workbooks/internal-guest-user.json",
+    {
+      resourceGroup  = local.rg_name,
+      workspaceName  = azurerm_log_analytics_workspace.log_analytics_workspace.name
+      tableName      = azapi_resource.workspaces_table_guest_users.name,
       subscriptionId = var.subscription_id
   })
 

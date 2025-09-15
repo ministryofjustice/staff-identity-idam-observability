@@ -22,7 +22,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "let sub=toscalar(\r\n    ${tableName}\r\n    | where isNotActivatedAfterExternalPolicyDays == true\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet sub2=toscalar(\r\n    ${tableName}\r\n    | where isInactiveAfterExternalPolicyDays == true\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet totalGuests=toscalar(\r\n    ${tableName}\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet results = \r\nunion (print Name = \"Is Not Actived After External Policy Days\", Count = sub),\r\n(print Name = \"Is Inactive After External Policy Days\", Count = sub2),\r\n        (print Name = \"Total Guest Users\", Count = totalGuests);\r\nresults",
+        "query": "let sub=toscalar(\r\n    ${tableName}\r\n    | where isNotActivatedAfterPolicyDays == true\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet sub2=toscalar(\r\n    ${tableName}\r\n    | where isInactiveAfterPolicyDays == true\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet totalGuests=toscalar(\r\n    ${tableName}\r\n    | summarize arg_max(objectid, *) by objectid\r\n    | count\r\n    );\r\nlet results = \r\nunion (print Name = \"Is Not Actived After Policy Days\", Count = sub),\r\n(print Name = \"Is Inactive After Policy Days\", Count = sub2),\r\n        (print Name = \"Total Guest Users\", Count = totalGuests);\r\nresults",
         "size": 0,
         "title": "Guest User Policy Status",
         "timeContext": {
