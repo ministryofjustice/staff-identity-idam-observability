@@ -254,7 +254,7 @@ function Get-AccessReviewGroups {
     return $reviewerGroupsList
 }
 
-#Run stuff
+#Run Azure authentication
 
 Write-LogInfo("Script execution started")
 Write-LogInfo("Authenticate with the credentials object.")
