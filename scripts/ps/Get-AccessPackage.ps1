@@ -13,8 +13,23 @@ param(
 )
 
 
+#Function to write log info
 function Write-LogInfo($logentry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
+}
+
+#Function to post to log analytics in stages
+function GroupPostResults($postData) {
+    for ($i = 0; $i -lt $postData.Count; $i += 500) {
+        $batchNumber = ([Math]::Min($i+499, $postData.Count-1))
+        $postDataBatch = $postData[$i..$batchNumber]
+
+        $json = $postDataBatch | ConvertTo-Json -Depth 10
+
+        PostLogAnalyticsData -logBody $json -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+        
+        Write-LogInfo("Sent batch from $($i+1) to $($batchNumber+1))")   
+    }
 }
 
 # Post data function
@@ -241,14 +256,34 @@ function Get-AccessReviewGroups {
 
 #Run stuff
 
+Write-LogInfo("Script execution started")
+Write-LogInfo("Authenticate with the credentials object.")
+try {
+    Write-LogInfo("Authenticate to Azure")
+    # Ensures you do not inherit an AzContext in your runbook
+    Disable-AzContextAutosave -Scope Process
+
+    # Connect to Azure with user-assigned managed identity
+    Connect-AzAccount -Identity -AccountId $MiClientId
+
+    $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
+    $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
+
+    Connect-MgGraph -Identity -ClientId $MiClientId
+    Write-LogInfo("Context is $context")
+} 
+catch {
+    write-error "$($_.Exception)"
+    throw "$($_.Exception)"
+}
+
 #Get the groups / apps on the access packages
 $accesspackageResourceinfo = Get-AccessPackageResources
 
-#Unique Access package Group ID's
+#Unique Access package Group ID's into variable
 $groupids = $accesspackageResourceinfo.GroupID | Select-Object -Unique
 
-#Call the function to get roles from the Groups on the access packages
-
+#Call the function to get roles from the Groups on the access packages using each access package groupid
 $entraRoles = Get-EntraRolesForGroups -GroupIDs $groupIDs
 
 #Get info on the access reviewers groups
@@ -305,6 +340,9 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
 }
 
 
-#Convert the $mergedExport to JSON to send it to Log analytics
-$JSONMergedExport = $combinedObjects | ConvertTo-Json
-PostLogAnalyticsData -logBody $JSONMergedExport -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+
+#Use function to post to Log Analytics
+Write-LogInfo("Post data to Log Analytics")
+GroupPostResults($combinedObjects)
+
+Write-LogInfo("Script execution finished")
