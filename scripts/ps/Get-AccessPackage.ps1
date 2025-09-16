@@ -40,84 +40,6 @@ function PostLogAnalyticsData()
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
-# --- Get Groups Dictionary --- Format:  ID: Displayname -- Need to get all groups as need to match it with access package resource
-function Get-GroupsDictionary {
-    $groupDictionary = @{}
-    $groups = Get-MgBetaGroup -All -Property Id, DisplayName
-    foreach ($group in $groups) {
-        $groupDictionary[$group.Id] = $group.DisplayName
-    }
-    return $groupDictionary
-}
-
-# --- Get Access Package Resources ---
-function Get-ResourcesFromAccessPackages {
-    param (
-        [hashtable]$GroupDictionary  # A lookup table mapping group IDs to their display names
-    )
-    
-    # Retrieve all access package catalogs in the tenant
-    $accessPackageCatalogs = Get-MgBetaEntitlementManagementAccessPackageCatalog -All
-
-    # Initialize an empty array to store the final export data
-    $exportList = @()
-
-    # Count the total number of catalogs for progress tracking
-    $totalCatalogs = $accessPackageCatalogs.Count
-
-    # Loop through each catalog
-    foreach ($catalog in $accessPackageCatalogs) {
-        Write-Host "[$($accessPackageCatalogs.IndexOf($catalog) + 1)/$($totalCatalogs)][Catalog: $($catalog.DisplayName)]"
-
-        # Get all resources associated with the current catalog
-        $resources = Get-MgBetaEntitlementManagementAccessPackageCatalogAccessPackageResource -AccessPackageCatalogId $catalog.Id -ExpandProperty *
-
-        # Get all access packages within the current catalog, including their resource role scopes
-        $accessPackages = Get-MgBetaEntitlementManagementAccessPackage -CatalogId $catalog.Id -ExpandProperty AccessPackageResourceRoleScopes
-
-        # Track how many access packages are in this catalog
-        $totalAccessPackagesInCatalog = $accessPackages.count
-        $counter = 1
-
-        # Loop through each access package
-        foreach ($accessPackage in $accessPackages) {
-            Write-Host "`t[$counter/$($totalAccessPackagesInCatalog)][Access Package: $($accessPackage.DisplayName)]"
-            $counter++
-
-            # Extract role IDs from the resource role scopes (format is usually "<roleId>_<resourceScopeId>")
-            $roleIDs = $accessPackage.AccessPackageResourceRoleScopes.Id | ForEach-Object { ($_ -split '_')[0] }
-
-            # Loop through each role ID to find the associated group/resource
-            foreach ($roleID in $roleIDs) {
-                # Find the matching role object in the catalog's resources
-                $roleObject = $resources.AccessPackageResourceRoles | Where-Object { $_.id -eq $roleID }
-
-                # Validate that the role object exists and has a properly formatted OriginId
-                if ($roleObject -and $roleObject.OriginId -and ($roleObject.OriginId -split '_').Count -ge 2) {
-                    # Extract the group/resource ID from the OriginId (second part after splitting)
-                    $matchedRole = ($roleObject.OriginId -split '_')[1]
-
-                    # Add a new entry to the export list with catalog, access package, and group details
-                    $exportList += [PSCustomObject][Ordered]@{
-                        Catalog          = $catalog.DisplayName
-                        CatalogID        = $catalog.id
-                        AccessPackage    = $accessPackage.DisplayName
-                        AccessPackageID  = $accessPackage.Id
-                        GroupDisplayname = $GroupDictionary[$matchedRole]
-                        GroupID          = $matchedRole
-                    }
-                } else {
-                    # If the role object is missing or malformed, skip it and log a warning
-                    Write-Warning "Skipping roleID '$roleID' due to missing or malformed OriginId"
-                }
-            }
-        }
-    }
-
-    # Return the full list of access package resource mappings
-    return $exportList
-}
-#Function to Get Entra Role Assignments for Access Package-Linked Groups
 function Get-EntraRolesForGroups {
     param (
         [array]$GroupIDs
@@ -171,38 +93,88 @@ function Get-EntraRolesForGroups {
 
     return $results
 }
-function Get-GroupOwnersWithNames {
-    param (
-        [array]$GroupIDs
-    )
-    #Creating empty array
-    $ownersList = @()
 
-    foreach ($groupId in $GroupIDs) {
-        try {
-            $owners = Get-MgGroupOwner -GroupId $groupId -ErrorAction Stop
+function Get-AccessPackageResources {
+    # Initialize an empty array to store the final data
+    $exportList = @()
 
-            foreach ($owner in $owners) {
-                $ownerDetails = $null
 
-                if ($owner.AdditionalProperties['@odata.type'] -eq '#microsoft.graph.user') {
-                    $ownerDetails = Get-MgUser -UserId $owner.Id -ErrorAction SilentlyContinue
-                } elseif ($owner.AdditionalProperties['@odata.type'] -eq '#microsoft.graph.servicePrincipal') {
-                    $ownerDetails = Get-MgServicePrincipal -ServicePrincipalId $owner.Id -ErrorAction SilentlyContinue
+    #Get info on all access packages
+    $allPackages = Get-MgEntitlementManagementAccessPackage
+
+
+    #Having to expand each individually to get the resource role scope due to a limitation in graph
+    $expandedPackages = foreach ($pkg in $allPackages) {
+        Get-MgEntitlementManagementAccessPackage -AccessPackageId $pkg.Id -ExpandProperty "resourceRoleScopes(`$expand=scope,role)"
+    } 
+
+    # Track how many access packages are in this catalog
+    $totalAccessPackagesInCatalog = $accessPackages.count
+
+    #Iteration counter in for loop
+    $counter = 1
+
+
+    #Loop through each access package and get the group
+    foreach ($accessPackage in $expandedPackages) {
+        Write-Host "`t[$counter/$($totalAccessPackagesInCatalog)][Access Package: $($accessPackage.DisplayName)]"
+        $counter++
+
+
+        #Time to iterate throught he scopes (Groups, apps) in the resourcerolescopes
+        foreach ($scope in $accessPackage.ResourceRoleScopes.Scope) {
+            try {
+                $group = Get-MgGroup -GroupId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
+                $exportList += [PSCustomObject][Ordered]@{
+                    AccessPackage    = $accessPackage.DisplayName
+                    AccessPackageID  = $accessPackage.Id
+                    Displayname      = $group.DisplayName
+                    Description      = $group.Description
+                    ScopeType        = "EntraGroup"  
+                    GroupID          = $group.id    
                 }
 
-                $ownersList += [PSCustomObject]@{
-                    GroupID   = $groupId
-                    OwnerName = if ($ownerDetails) { $ownerDetails.DisplayName } else { "Unknown ($($owner.Id))" }
-                    OwnerId   = $owner.Id
+            }
+            catch {
+                #If get group command errors, check for enterprise app
+                Write-Host "No Group found, trying Enterprise App"
+
+                try {
+                    #Get the service principal
+                    $app = Get-MgServicePrincipal -ServicePrincipalId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
+                    $exportList += [PSCustomObject][Ordered]@{
+                        AccessPackage    = $accessPackage.DisplayName
+                        AccessPackageID  = $accessPackage.Id
+                        Displayname      = $app.DisplayName
+                        Description      = "Enterprise application"
+                        ScopeType        = "ServicePrincipal"
+                    }
+
+                }
+                catch {
+                    Write-Host "No Enterprise App found, checking App reg."
+                    #If enterprise app fails, check for app reg
+
+                    try {
+                        $app = Get-MgApplicaiton -Applicationid $scope.OriginId #Forces terminating error to go to catch
+                        $exportList += [PSCustomObject][Ordered]@{
+                            AccessPackage    = $accessPackage.DisplayName
+                            AccessPackageID  = $accessPackage.Id
+                            Displayname      = $app.DisplayName
+                            Description      = "App Registration"
+                            ScopeType        = "AppRegistration"
+                        }
+                    }
+                    catch {
+                       write-host "No Groups, or apps found"
+                    }
+
+
                 }
             }
-        } catch {
-            Write-Warning "Failed to retrieve owners for group $groupId"
         }
     }
-
-    return $ownersList
+    return $exportList
 }
 
 function Get-AccessReviewGroups {
@@ -267,110 +239,72 @@ function Get-AccessReviewGroups {
     return $reviewerGroupsList
 }
 
+#Run stuff
 
-# --- Run Everything ---
-Write-LogInfo("Script execution started")
+#Get the groups / apps on the access packages
+$accesspackageResourceinfo = Get-AccessPackageResources
 
-try 
-{
-    Write-LogInfo("Authenticate to Azure")
-    # Ensures you do not inherit an AzContext in your runbook
-    Disable-AzContextAutosave -Scope Process
+#Unique Access package Group ID's
+$groupids = $accesspackageResourceinfo.GroupID | Select-Object -Unique
 
-    # Connect to Azure with user-assigned managed identity
-    Connect-AzAccount -Identity -AccountId $MiClientId
+#Call the function to get roles from the Groups on the access packages
 
-    $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
-    $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
-
-    Connect-MgGraph -Identity -ClientId $MiClientId
-    Write-LogInfo("Context is $context")
-} 
-catch 
-{
-  write-error "$($_.Exception)"
-  throw "$($_.Exception)"
-}
-
-$groupsDictionary = Get-GroupsDictionary
-$getAllAccessPackagesWithResources = Get-ResourcesFromAccessPackages -GroupDictionary $groupsDictionary
-
-# Get unique group IDs and access package IDs
-$groupIDs = $getAllAccessPackagesWithResources.GroupID | Select-Object -Unique
-$accessPackageIDs = $getAllAccessPackagesWithResources.AccessPackageID | Select-Object -Unique
-
-# Function to Get Entra Role Assignments for Access Package-Linked Groups
 $entraRoles = Get-EntraRolesForGroups -GroupIDs $groupIDs
 
-# Get Group owners from Access package Group ID's above
-$groupOwners = Get-GroupOwnersWithNames -GroupIDs $groupIDs
-
-# Get Access reviewers
+#Get info on the access reviewers groups
+$accessPackageIDs = $accesspackageResourceinfo | Select-Object -ExpandProperty AccessPackageID -Unique
 $accessReviewers = Get-AccessReviewGroups -AccessPackageIDs $accessPackageIDs
 
-# --- Merge Everything ---
+#Combining $accesspackageResourceinfo, $entraRoles and $accessReviewers into useful data
+$combinedObjects = foreach ($package in $accesspackageResourceinfo) {
+    $accessPackageID = $package.AccessPackageID
+    $groupID = $package.GroupID
 
-# Loop through each access package entry and enrich it with related role, owner, and reviewer data
-$mergedExport = foreach ($entry in $getAllAccessPackagesWithResources) {
+    $roles = $entraRoles | Where-Object { $_.GroupID -eq $groupID }
+    $reviewer = $accessReviewers | Where-Object { $_.AccessPackageID -eq $accessPackageID }
 
-    # Find any Entra role assignments or eligibilities linked to the group in this access package
-    $matchingRoles = $entraRoles | Where-Object { $_.GroupID -eq $entry.GroupID }
+    # If no roles found, still output one row
+    if ($roles.Count -eq 0) {
+        [PSCustomObject]@{
+            AccessPackage       = $package.AccessPackage
+            AccessPackageID     = $accessPackageID
+            DisplayName         = $package.DisplayName
+            Description         = $package.Description
+            ScopeType           = $package.ScopeType
+            GroupID             = $groupID
 
-    # Find the owners of the group associated with this access package
-    $matchingOwners = $groupOwners | Where-Object { $_.GroupID -eq $entry.GroupID }
+            RoleName            = $null
+            RoleDescription     = $null
+            AssignmentType      = $null
+            RoleStatus          = $null
 
-    # Find reviewers assigned to the access package (via access reviews
-    $matchingReviewers = $accessReviewers | Where-Object { $_.AccessPackageID -eq $entry.AccessPackageID }
-
-    # Combine owner names into a single string
-    $ownerNames = ($matchingOwners | Select-Object -ExpandProperty OwnerName) -join ', '
-
-    # Combine reviewer names into a single string
-    $reviewerNames = ($matchingReviewers | Select-Object -ExpandProperty ReviewerGroupName) -join ', '
-    #OLD $reviewerNames = ($matchingReviewers | Select-Object -ExpandProperty ReviewerName) -join ', '
-
-
-    # If no Entra roles are assigned to the group, return a single entry with empty role fields
-    if ($matchingRoles.Count -eq 0) {
-        [PSCustomObject][Ordered]@{
-            Catalog           = $entry.Catalog
-            #CatalogID         = $entry.CatalogID 
-            AccessPackage     = $entry.AccessPackage
-            #AccessPackageID   = $entry.AccessPackageID
-            GroupDisplayname  = $entry.GroupDisplayname
-            #GroupID           = $entry.GroupID
-            RoleName          = "No role found"
-            #RoleDescription   = "No role found"
-            #Scope             = "No role found"
-            AssignmentType    = "no role found"
-            RoleStatus        = "no role found"
-            GroupOwners       = $ownerNames
-            AccessReviewers   = $reviewerNames
+            ReviewerGroupName   = $reviewer.ReviewerGroupName
+            ReviewerGroupId     = $reviewer.ReviewerGroupId
         }
-         # If roles are found, return one entry per role assignment
-    } else {
-        foreach ($role in $matchingRoles) {
-            [PSCustomObject][Ordered]@{
-                Catalog           = $entry.Catalog
-                AccessPackage     = $entry.AccessPackage
-                GroupDisplayname  = $entry.GroupDisplayname
-                RoleName          = $role.RoleName
-                AssignmentType    = $role.AssignmentType
-                RoleStatus        = $role.RoleStatus
-                GroupOwners       = $ownerNames
-                AccessReviewers   = $reviewerNames
+    }
+    else {
+        foreach ($role in $roles) {
+            [PSCustomObject]@{
+                AccessPackage       = $package.AccessPackage
+                AccessPackageID     = $accessPackageID
+                DisplayName         = $package.DisplayName
+                Description         = $package.Description
+                ScopeType           = $package.ScopeType
+                GroupID             = $groupID
+
+                RoleName            = $role.RoleName
+                RoleDescription     = $role.RoleDescription
+                AssignmentType      = $role.AssignmentType
+                RoleStatus          = $role.RoleStatus
+
+                ReviewerGroupName   = $reviewer.ReviewerGroupName
+                ReviewerGroupId     = $reviewer.ReviewerGroupId
             }
         }
     }
 }
-###$ JUST FOR TESTING OUTPUT###mergedExport | ForEach-Object { $_ } | Export-Csv -Path "$ExportToExcelPath\AccessPackageResourcesWithRoles.csv" -NoTypeInformation
-
-
-
-### JUST FOR TESTING Testing##$ExportToExcelPath = 
-###$ JUST FOR TESTING OUTPUT###mergedExport | ForEach-Object { $_ } | Export-Csv -Path "$ExportToExcelPath\AccessPackageResourcesWithRoles.csv" -NoTypeInformation
 
 
 #Convert the $mergedExport to JSON to send it to Log analytics
-$JSONMergedExport = $mergedExport | ConvertTo-Json
+$JSONMergedExport = $combinedObjects | ConvertTo-Json
 PostLogAnalyticsData -logBody $JSONMergedExport -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
