@@ -49,6 +49,17 @@ resource "azurerm_role_assignment" "assign_identity_dcr_guest_users_monitoring_p
   ]
 }
 
+resource "azurerm_role_assignment" "assign_identity_dcr_Access_package_monitoring_publisher" {
+  scope                = azurerm_monitor_data_collection_rule.data_collection_rule_AccessPackage.id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+
+  depends_on = [
+    azurerm_user_assigned_identity.managed_identity,
+    azurerm_automation_account.automation_account,
+  ]
+}
+
 ## Custom role not created in code as the pipeline does not have permissions
 ## We didn't want to create elevated permissionss onthe pipeline for  just for this one item
 #resource "azuread_custom_directory_role" "assign_identity_automation_account_application_update" {
