@@ -76,19 +76,35 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
         name = "${var.department}_${var.team}_${var.project}_AccessPackage_CL",
         columns = [
           {
-            name = "Catalog",
-            type = "string"
-          },
-          {
             name = "AccessPackage",
             type = "string"
           },
           {
-            name = "GroupDisplayname",
+            name = "AccessPackageID",
+            type = "string"
+          },
+          {
+            name = "DisplayName",
+            type = "string"
+          },
+          {
+            name = "Description",
+            type = "string"
+          },
+          {
+            name = "ScopeType",
+            type = "string"
+          },
+          {
+            name = "GroupID",
             type = "string"
           },
           {
             name = "RoleName",
+            type = "string"
+          },
+          {
+            name = "RoleDescription",
             type = "string"
           },
           {
@@ -100,11 +116,11 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
             type = "string"
           },
           {
-            name = "GroupOwners",
+            name = "ReviewerGroupName",
             type = "string"
           },
           {
-            name = "AccessReviewers",
+            name = "ReviewerGroupId",
             type = "string"
           },
           {
