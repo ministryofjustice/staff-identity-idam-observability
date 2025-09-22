@@ -120,7 +120,7 @@ function Get-AccessPackageResources {
 
     #Having to expand each individually to get the resource role scope due to a limitation in graph
     $expandedPackages = foreach ($pkg in $allPackages) {
-        Get-MgEntitlementManagementAccessPackage -AccessPackageId $pkg.Id -ExpandProperty "resourceRoleScopes(`$expand=scope,role)"
+        Get-MgEntitlementManagementAccessPackage -AccessPackageId $pkg.Id -ExpandProperty "resourceRoleScopes(`$expand=scope,role)", "catalog"
     } 
 
     # Track how many access packages are in this catalog
@@ -139,6 +139,7 @@ function Get-AccessPackageResources {
         #Time to iterate throught he scopes (Groups, apps) in the resourcerolescopes
         foreach ($scope in $accessPackage.ResourceRoleScopes.Scope) {
             try {
+                $catalogName = $accessPackage.Catalog.DisplayName
                 $group = Get-MgGroup -GroupId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
                 $exportList += [PSCustomObject][Ordered]@{
                     AccessPackage    = $accessPackage.DisplayName
@@ -146,7 +147,8 @@ function Get-AccessPackageResources {
                     Displayname      = $group.DisplayName
                     Description      = $group.Description
                     ScopeType        = "EntraGroup"  
-                    GroupID          = $group.id    
+                    GroupID          = $group.id
+                    CatalogName      = $catalogName     
                 }
 
             }
@@ -163,6 +165,7 @@ function Get-AccessPackageResources {
                         Displayname      = $app.DisplayName
                         Description      = "Enterprise application"
                         ScopeType        = "ServicePrincipal"
+                        CatalogName      = $catalogName
                     }
 
                 }
@@ -178,6 +181,7 @@ function Get-AccessPackageResources {
                             Displayname      = $app.DisplayName
                             Description      = "App Registration"
                             ScopeType        = "AppRegistration"
+                            CatalogName      = $catalogName 
                         }
                     }
                     catch {
@@ -307,6 +311,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             Description         = $package.Description
             ScopeType           = $package.ScopeType
             GroupID             = $groupID
+            CatalogName         = $package.CatalogName
 
             RoleName            = $null
             RoleDescription     = $null
@@ -326,6 +331,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
                 Description         = $package.Description
                 ScopeType           = $package.ScopeType
                 GroupID             = $groupID
+                CatalogName         = $package.CatalogName 
 
                 RoleName            = $role.RoleName
                 RoleDescription     = $role.RoleDescription
