@@ -204,19 +204,39 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
   stream_declaration {
     stream_name = "Custom-${azapi_resource.workspaces_table_access_package_info.name}"
     column {
-      name = "Catalog"
-      type = "string"
-    }
-    column {
       name = "AccessPackage"
       type = "string"
     }
     column {
-      name = "GroupDisplayname"
+      name = "AccessPackageID"
+      type = "string"
+    }
+    column {
+      name = "DisplayName"
+      type = "string"
+    }
+    column {
+      name = "Description"
+      type = "string"
+    }
+    column {
+      name = "ScopeType"
+      type = "string"
+    }
+    column {
+      name = "GroupID"
+      type = "string"
+    }
+    column {
+      name = "CatalogName"
       type = "string"
     }
     column {
       name = "RoleName"
+      type = "string"
+    }
+    column {
+      name = "RoleDescription"
       type = "string"
     }
     column {
@@ -228,11 +248,11 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       type = "string"
     }
     column {
-      name = "GroupOwners"
+      name = "ReviewerGroupName"
       type = "string"
     }
     column {
-      name = "AccessReviewers"
+      name = "ReviewerGroupId"
       type = "string"
     }
     column {
