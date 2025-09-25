@@ -60,8 +60,8 @@ resource "azurerm_role_assignment" "assign_identity_dcr_Access_package_monitorin
   ]
 }
 
-resource "azurerm_role_assignment" "assign_identity_dcr_guest_user_delete_monitoring_publisher" {
-  scope                = azurerm_monitor_data_collection_rule.data_collection_rule_guest_user_delete.id
+resource "azurerm_role_assignment" "assign_identity_dcr_guest_del_monitoring_publisher" {
+  scope                = azurerm_monitor_data_collection_rule.data_collection_rule_guest_del.id
   role_definition_name = "Monitoring Metrics Publisher"
   principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
 
