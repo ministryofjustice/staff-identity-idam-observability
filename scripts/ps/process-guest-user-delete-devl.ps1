@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-    A script to remove expired credentials from App Registrations
+    A script to remove Guest users from the tenant.
      
     .DESCRIPTION
-    Leverage Microsoft Graph API and PowerShell to fetch a list of credentials (Certificates and Secrets) that are on Application Registrations, established expired credentials and remove these.
+    Used for the DEV environments, this helps ensure our tenants are in a healthy and uncluttered position.
 #>
 param (
     [string]$MiClientId,
