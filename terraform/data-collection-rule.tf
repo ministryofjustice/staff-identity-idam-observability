@@ -404,6 +404,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
   stream_declaration {
     stream_name = "Custom-${azapi_resource.workspaces_table_guest_user_delete_script.name}"
     column {
+      name = "id"
+      type = "string"
+    }
+    column {
       name = "displayname"
       type = "string"
     }
@@ -437,6 +441,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
     }
     column {
       name = "department"
+      type = "string"
+    }
+    column {
+      name = "cleanup"
       type = "string"
     }
     column {

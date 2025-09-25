@@ -310,6 +310,10 @@ resource "azapi_resource" "workspaces_table_guest_user_delete_script" {
         name = "${var.department}_${var.team}_${var.project}_guest_user_delete_logs_CL",
         columns = [
           {
+            name = "id",
+            type = "string"
+          },
+          {
             name = "displayname",
             type = "string"
           },
@@ -343,6 +347,10 @@ resource "azapi_resource" "workspaces_table_guest_user_delete_script" {
           },
           {
             name = "department",
+            type = "string"
+          },
+          {
+            name = "cleanup",
             type = "string"
           },
           {

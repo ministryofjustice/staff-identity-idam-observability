@@ -103,18 +103,30 @@ foreach ($member in $groupMembers) {
     $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
 
     if ($isToBeDeleted -eq $true) {
+        
+        $removal = "Removed"
+        
+        try {
+            Remove-MgUser -UserId $user.Id
+        }
+        catch
+        {
+            $removal = "$($_.Exception)"
+        }
 
         $userDetails += [PSCustomObject]@{
-            Id                = $user.Id
-            DisplayName       = $user.DisplayName
-            UserPrincipalName = $user.UserPrincipalName
-            CreatedDateTime   = $user.CreatedDateTime
-            DaysSinceCreated  = $DaysSinceCreated
-            LastLoginDate     = $LastLoginDate
-            DaysInactive      = $DaysInactive
-            CompanyName       = $user.CompanyName
-            JobTitle          = $user.JobTitle
-            Department        = $user.Department
+            id                = $user.Id
+            displayname       = $user.DisplayName
+            userprincipalname = $user.UserPrincipalName
+            createddatetime   = $user.CreatedDateTime
+            dayssincecreated  = $DaysSinceCreated
+            lastlogindate     = $LastLoginDate
+            daysinactive      = $DaysInactive
+            companyname       = $user.CompanyName
+            jobtitle          = $user.JobTitle
+            department        = $user.Department
+            cleanup           = $removal
+            TimeGenerated     = $ExpiredCred.TimeGenerated
         }
     }
 }
