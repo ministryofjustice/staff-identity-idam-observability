@@ -335,11 +335,11 @@ resource "azapi_resource" "workspaces_table_guest_user_delete_script" {
           },
           {
             name = "companyname",
-            type = "dateTime"
+            type = "string"
           },
           {
             name = "jobtitle",
-            type = "dateTime"
+            type = "string"
           },
           {
             name = "department",

@@ -408,52 +408,40 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
       type = "string"
     }
     column {
-      name = "cleanup"
+      name = "userprincipalname"
       type = "string"
     }
     column {
-      name = "applicationid"
-      type = "string"
-    }
-    column {
-      name = "credtype"
-      type = "string"
-    }
-    column {
-      name = "startdate"
+      name = "createddatetime"
       type = "datetime"
     }
     column {
-      name = "enddate"
-      type = "datetime"
-    }
-    column {
-      name = "daystoexpiration"
+      name = "dayssincecreated"
       type = "int"
     }
     column {
-      name = "objectid"
+      name = "lastlogindate"
+      type = "datetime"
+    }
+    column {
+      name = "daysinactive"
+      type = "int"
+    }
+    column {
+      name = "companyname"
       type = "string"
     }
     column {
-      name = "keyid"
+      name = "jobtitle"
       type = "string"
     }
     column {
-      name = "description"
+      name = "department"
       type = "string"
     }
     column {
       name = "TimeGenerated"
       type = "datetime"
-    }
-    column {
-      name = "status"
-      type = "string"
-    }
-    column {
-      name = "owners"
-      type = "string"
     }
   }
 
