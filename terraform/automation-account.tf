@@ -62,8 +62,8 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   description             = "Run AccessPackage runbook every 2 weeks."
 }
 
-resource "azurerm_automation_schedule" "automation_schedule_guest_user_delete" {
-  name                    = "as-${var.department}-${var.team}-${var.project}-guest-user-delete"
+resource "azurerm_automation_schedule" "automation_schedule_guest_del" {
+  name                    = "as-${var.department}-${var.team}-${var.project}-guest-del"
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"

@@ -298,16 +298,16 @@ resource "azapi_resource" "workspaces_table_guest_users" {
   ]
 }
 
-resource "azapi_resource" "workspaces_table_guest_user_delete_script" {
+resource "azapi_resource" "workspaces_table_guest_del_script" {
   type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
-  name      = "${var.department}_${var.team}_${var.project}_guest_user_delete_logs_CL"
+  name      = "${var.department}_${var.team}_${var.project}_guest_del_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
   body = jsonencode({
     properties = {
       plan = "Analytics",
       schema = {
-        name = "${var.department}_${var.team}_${var.project}_guest_user_delete_logs_CL",
+        name = "${var.department}_${var.team}_${var.project}_guest_del_logs_CL",
         columns = [
           {
             name = "id",

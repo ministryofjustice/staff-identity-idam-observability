@@ -374,7 +374,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
   tags = local.tags
 }
 
-resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user_delete" {
+resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_del" {
   name                        = "dcr-${var.department}-${var.team}-${var.project}-guest-user-delete-cleanup"
   location                    = var.location
   resource_group_name         = local.rg_name
@@ -388,10 +388,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
   }
 
   data_flow {
-    streams       = ["Custom-${azapi_resource.workspaces_table_guest_user_delete_script.name}"]
+    streams       = ["Custom-${azapi_resource.workspaces_table_guest_del_script.name}"]
     destinations  = [azurerm_log_analytics_workspace.log_analytics_workspace.name]
     transform_kql = "source"
-    output_stream = "Custom-${azapi_resource.workspaces_table_guest_user_delete_script.name}"
+    output_stream = "Custom-${azapi_resource.workspaces_table_guest_del_script.name}"
   }
 
   identity {
@@ -402,7 +402,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
   }
 
   stream_declaration {
-    stream_name = "Custom-${azapi_resource.workspaces_table_guest_user_delete_script.name}"
+    stream_name = "Custom-${azapi_resource.workspaces_table_guest_del_script.name}"
     column {
       name = "id"
       type = "string"
@@ -455,7 +455,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_user
 
   description = "Data collection rule for guest user deletion"
   depends_on = [
-    azapi_resource.workspaces_table_guest_user_delete_script,
+    azapi_resource.workspaces_table_guest_del_script,
     azurerm_monitor_data_collection_endpoint.data_collection_endpoint
   ]
 
