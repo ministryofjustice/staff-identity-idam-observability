@@ -73,3 +73,22 @@ resource "azurerm_automation_runbook" "runbook_guest_users_script" {
 
   tags = local.tags
 }
+
+data "local_file" "app_registrations_guest_user_delete_devl" {
+  filename = "${path.module}/../scripts/ps/process-guest-user-delete-devl.ps1"
+}
+
+resource "azurerm_automation_runbook" "runbook_guest_user_delete_devl" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-guest-users-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Deletes guest users within certain parameters."
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.app_registrations_guest_user_delete_devl.content
+
+  tags = local.tags
+}

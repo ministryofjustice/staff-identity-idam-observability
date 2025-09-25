@@ -297,3 +297,73 @@ resource "azapi_resource" "workspaces_table_guest_users" {
     azurerm_log_analytics_workspace.log_analytics_workspace
   ]
 }
+
+resource "azapi_resource" "workspaces_table_guest_user_delete_script" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_guest_user_delete_logs_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_guest_user_delete_logs_CL",
+        columns = [
+          {
+            name = "id",
+            type = "string"
+          },
+          {
+            name = "displayname",
+            type = "string"
+          },
+          {
+            name = "userprincipalname",
+            type = "string"
+          },
+          {
+            name = "createddatetime",
+            type = "dateTime"
+          },
+          {
+            name = "dayssincecreated",
+            type = "int"
+          },
+          {
+            name = "lastlogindate",
+            type = "dateTime"
+          },
+          {
+            name = "daysinactive",
+            type = "int"
+          },
+          {
+            name = "companyname",
+            type = "string"
+          },
+          {
+            name = "jobtitle",
+            type = "string"
+          },
+          {
+            name = "department",
+            type = "string"
+          },
+          {
+            name = "cleanup",
+            type = "string"
+          },
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
