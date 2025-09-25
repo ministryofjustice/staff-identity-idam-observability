@@ -107,7 +107,7 @@ foreach ($member in $groupMembers) {
         $removal = "Removed"
         
         try {
-            Remove-MgUser -UserId $user.Id
+            Remove-MgUser -UserId $user.Id -ErrorAction Stop
         }
         catch
         {
@@ -132,10 +132,9 @@ foreach ($member in $groupMembers) {
 }
 
 
-Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Credentials Found (expired over 30 days).")
+Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Geuest Found.")
 
-# Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
-Write-LogInfo("Convert Credentials list to JSON")
+Write-LogInfo("Convert Guests list to JSON")
 $userDetailsJSON = ConvertTo-Json @($userDetails)
 
 Write-LogInfo("Post data to Log Analytics")
