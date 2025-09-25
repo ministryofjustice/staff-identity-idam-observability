@@ -9,7 +9,8 @@ param (
     [string]$MiClientId,
     [string]$DcrImmutableId,
     [string]$DceUri,
-    [string]$LogTableName
+    [string]$LogTableName,
+    [string]$mailSender
 )
 
 # --- Start variables
@@ -214,5 +215,43 @@ $RemovedCredsJSON = ConvertTo-Json @($RemovedCreds)
 
 Write-LogInfo("Post data to Log Analytics")
 PostLogAnalyticsData -logBody $RemovedCredsJSON -dcrImmutableId $DcrImmutableId -dceUri $DceUri -table $LogTableName
+
+Write-LogInfo("Send email notification")
+$table = $RemovedCreds | Select-Object displayname,cleanup,credtype,enddate,daystoexpiration,description,status,owners | ConvertTo-Html |Out-String
+
+$style = @"
+<style>
+    table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 10px; }
+    th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+    th { background-color: #f2f2f2; }
+</style>
+"@
+
+$body = $style + $table
+$expiredCount = $ExpiredCreds.Count
+$removedCount = $RemovedCreds.Count
+
+# Create the parameter sets
+$params = @{
+	message = @{
+		subject = "Expired Creds Test"
+		body = @{
+			contentType = "Html"
+			content = "Dear IDAM Team,<br>$expiredCount expired credentials have been found, automation attempted to cleanup $removedCount credentials.<br>Please see details in this cleanup run below: $body <br> Further columns can be found in the logs analytics table"
+		}
+		toRecipients = @(
+			@{
+				emailAddress = @{
+					address = "idamteam@justice.gov.uk"
+				}
+			}
+		)
+	}
+	saveToSentItems = "false"
+}
+
+# Send the email
+Send-MgUserMail -UserId $mailSender -BodyParameter $params
+
 
 Write-LogInfo("Script execution finished")
