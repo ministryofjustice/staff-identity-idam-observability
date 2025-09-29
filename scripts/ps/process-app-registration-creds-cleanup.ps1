@@ -230,11 +230,12 @@ $style = @"
 $body = $style + $table
 $expiredCount = $ExpiredCreds.Count
 $removedCount = $RemovedCreds.Count
+$tenantName = Get-MgOrganization
 
 # Create the parameter sets
 $params = @{
 	message = @{
-		subject = "Expired Creds Test"
+		subject = "$($tenantName.DisplayName) - Expired Credentials Removal"
 		body = @{
 			contentType = "Html"
 			content = "Dear IDAM Team,<br>$expiredCount expired credentials have been found, automation attempted to cleanup $removedCount credentials.<br>Please see details in this cleanup run below: $body <br> Further columns can be found in the logs analytics table"
