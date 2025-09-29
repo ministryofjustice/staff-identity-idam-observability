@@ -89,7 +89,7 @@ catch
 }
 
 
-$group = Get-EntraGroup -Filter "displayName eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff'"
+$group = Get-MgGroup -Filter "displayName eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff'"
 
 $groupMembers = Get-MgGroupMember -GroupId $group.Id
 
