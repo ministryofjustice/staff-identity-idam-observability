@@ -69,6 +69,7 @@ jobs:
         run: terraform init -input=false
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
+          TF_VAR_workspace: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
@@ -79,6 +80,7 @@ jobs:
         run: terraform validate
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
+          TF_VAR_workspace: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
@@ -89,6 +91,7 @@ jobs:
         id: terraform_plan
         env:
           TF_WORKSPACE: ${{ inputs.workspace_name }}
+          TF_VAR_workspace: ${{ inputs.workspace_name }}
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}

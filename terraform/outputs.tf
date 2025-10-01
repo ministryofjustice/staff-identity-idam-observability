@@ -1,3 +1,7 @@
+output "workspace_name" {
+  value = var.workspace_name
+}
+
 output "resource_group_name" {
   value = local.rg_name
 }
