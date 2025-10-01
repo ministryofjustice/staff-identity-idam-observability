@@ -35,10 +35,10 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule" {
   runbook_name            = azurerm_automation_runbook.runbook.name
   schedule_name           = azurerm_automation_schedule.automation_schedule.name
   parameters = { 
-    "MiClientId"     = azurerm_user_assigned_identity.managed_identity.client_id,
-    "DcrImmutableId" = azurerm_monitor_data_collection_rule.data_collection_rule.immutable_id,
-    "DceUri"         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
-    "LogTableName"   = azapi_resource.workspaces_table.name
+    MiClientId     = azurerm_user_assigned_identity.managed_identity.client_id,
+    DcrImmutableId = azurerm_monitor_data_collection_rule.data_collection_rule.immutable_id,
+    DceUri         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
+    LogTableName   = azapi_resource.workspaces_table.name
   }
 }
 
