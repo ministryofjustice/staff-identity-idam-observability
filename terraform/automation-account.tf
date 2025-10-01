@@ -25,8 +25,21 @@ resource "azurerm_automation_schedule" "automation_schedule" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-09-30T07:00:00+01:00"
+  start_time              = "2025-10-01T07:00:00+01:00"
   description             = "Run export daily."
+}
+
+resource "azurerm_automation_job_schedule" "automation_job_schedule" {
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  runbook_name            = azurerm_automation_runbook.runbook.name
+  schedule_name           = azurerm_automation_schedule.automation_schedule.name
+  parameters = { 
+    "MiClientId"     = azurerm_user_assigned_identity.managed_identity.client_id,
+    "DcrImmutableId" = azurerm_monitor_data_collection_rule.data_collection_rule.immutable_id,
+    "DceUri"         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
+    "LogTableName"   = azapi_resource.workspaces_table.name
+  }
 }
 
 resource "azurerm_automation_schedule" "automation_schedule_cleanup" {
