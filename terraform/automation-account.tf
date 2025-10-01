@@ -25,7 +25,7 @@ resource "azurerm_automation_schedule" "automation_schedule" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-10-01T07:00:00+01:00"
+  start_time              = "2025-10-02T07:00:00+01:00"
   description             = "Run daily application registration credential report."
 }
 
@@ -60,7 +60,7 @@ resource "azurerm_automation_schedule" "automation_schedule_guest_users" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-10-01T07:00:00+01:00"
+  start_time              = "2025-10-02T07:00:00+01:00"
   description             = "Run Guest User reporting daily."
 }
 
@@ -86,7 +86,7 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   frequency               = "Day"
   interval                = 14
   timezone                = "Europe/London"
-  start_time              = "2025-10-01T07:00:00+01:00"
+  start_time              = "2025-10-02T07:00:00+01:00"
   description             = "Run AccessPackage runbook every 2 weeks."
 }
 
@@ -112,7 +112,7 @@ resource "azurerm_automation_schedule" "automation_schedule_guest_del" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-10-01T07:00:00+01:00"
+  start_time              = "2025-10-02T07:00:00+01:00"
   description             = "Run Guest User Delete every day."
 }
 
