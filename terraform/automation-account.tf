@@ -64,6 +64,21 @@ resource "azurerm_automation_schedule" "automation_schedule_guest_users" {
   description             = "Run export daily."
 }
 
+resource "azurerm_automation_job_schedule" "automation_job_schedule_guest_users" {
+  count = var.workspace_name == "DEVLEXTERNAL" || var.workspace_name == "LIVE" || var.workspace_name == "LIVEEXTERNAL" ? 1 : 0
+
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  runbook_name            = azurerm_automation_runbook.runbook_guest_users_script.name
+  schedule_name           = azurerm_automation_schedule.automation_schedule_guest_users.name
+  parameters = {
+    miclientid     = azurerm_user_assigned_identity.managed_identity.client_id,
+    dcrimmutableid = azurerm_monitor_data_collection_rule.data_collection_rule_guest_users.immutable_id,
+    dceuri         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
+    logtablename   = azapi_resource.workspaces_table_guest_users.name
+  }
+}
+
 resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   name                    = "as-${var.department}-${var.team}-${var.project}-access-package"
   resource_group_name     = local.rg_name
