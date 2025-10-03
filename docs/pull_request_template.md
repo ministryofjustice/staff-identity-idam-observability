@@ -1,23 +1,43 @@
-# Purpose
 
-_Briefly describe the purpose of the change, and/or link to the JIRA ticket for context_
+## 🚀 Pull Request Summary
 
-Fixes #
+**Title:**  
+_A clear and concise title for the PR._
 
-## Approach
+**Description:**  
+<!--
+Provide a concise summary of what this PR changes related to Azure IAM.
+Example: "Add new Azure RBAC role assignment for monitoring service principal" or
+"Update automation script to rotate Azure Key Vault access policies"
+-->
 
-_Explain how your code addresses the purpose of the change_
+**Fixes:** [Jira-xxxx](https://dsdmoj.atlassian.net/browse/IDAM-xxxx)
 
-## Learning
+## 🧪 Testing & Validation
 
-_Any tips and tricks, blog posts or tools which helped you. Plus anything notable you've discovered about the <TODO> service_
+- [ ] Have changes been tested?
+- [ ] Are there **unit/integration tests** for IAM logic or automation scripts?
 
-## Checklist
+## 📄 Documentation
 
-* [ ] I have performed a self-review of my own code
-* [ ] I have added relevant logging with appropriate levels to my code
-* [ ] I have updated documentation (Confluence/GitHub wiki/tech debt doc) where relevant
-* [ ] I have added tests to prove my work
-* [ ] I have added welsh translation tags and updated translation files
-* [ ] I have run an accessibility tool on any pages I have made changes to and fixed any issues found
-* [ ] The product team have tested these changes
+- [ ] Is there documentation for new IAM roles, policies, or automation logic etc?
+- [ ] Have runbooks or operational guides been updated?
+
+## 📎 Related Issues / Tickets
+
+_Reference any related issues, JIRA tickets, or documentation._
+
+## ✅ Checklist
+
+- [ ] I have reviewed the code and confirm it meets the project’s IAM, security and automation standards.
+- [ ] I have verified that no sensitive data is exposed in logs or code.
+- [ ] I have updated relevant documentation and diagrams.
+- [ ] I have reviewed my own code and the plan
+
+---
+
+🛡️ **Security is everyone's responsibility. Please ensure all IAM changes are reviewed carefully.**
+
+## ✅ Reviewer Checklist
+- [ ] I have reviewed the code and confirm it meets the project’s IAM, security and automation standards.
+- [ ] I have verified that no sensitive data is exposed in logs or code.
