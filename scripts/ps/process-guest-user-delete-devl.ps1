@@ -88,49 +88,115 @@ catch
   throw "$($_.Exception)"
 }
 
+function GetGroupMembers($GroupName) {
+    $group = Get-MgGroup -Filter "displayName eq '$GroupName'"
 
-$group = Get-MgGroup -Filter "displayName eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff'"
+    return Get-MgGroupMember -GroupId $group.Id
+}
 
-$groupMembers = Get-MgGroupMember -GroupId $group.Id
-
-foreach ($member in $groupMembers) {
+function GetUserDetails($UserId, $JobTitle) {
     $user = Get-MgUser -UserId $member.Id -Property ID, DisplayName, UserPrincipalName, SignInActivity, CompanyName, JobTitle, Department, CreatedDateTime
 
-    $LastLoginDate = $user.SignInActivity.LastSignInDateTime
+    if ($JobTitle -eq $user.JobTitle) {
 
-    $DaysInactive = GetDaysInactive($LastLoginDate);
-    $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
-    $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
+        $LastLoginDate = $user.SignInActivity.LastSignInDateTime
 
-    if ($isToBeDeleted -eq $true) {
+        $DaysInactive = GetDaysInactive($LastLoginDate);
+        $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
+
+        return  [PSCustomObject]@{
+                    id                = $user.Id
+                    displayname       = $user.DisplayName
+                    userprincipalname = $user.UserPrincipalName
+                    createddatetime   = $user.CreatedDateTime
+                    dayssincecreated  = $DaysSinceCreated
+                    lastlogindate     = $LastLoginDate
+                    daysinactive      = $DaysInactive
+                    companyname       = $user.CompanyName
+                    jobtitle          = $user.JobTitle
+                    department        = $user.Department
+                }
+    }
+}
+
+function CheckGuestUsersExternalSync() {
+
+    $groupMembers = GetGroupMembers("MoJo-External-Sync-Legal-Aid-Agency-Staff")
+    $deleteType = "externalsync"
+    $removal = "Removed"
+    
+    foreach ($member in $groupMembers) {
+        $user = GetUserDetails($member.Id, "Internal SilAS Test Account")
+
+        $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
         
-        $removal = "Removed"
-        
-        try {
-            Remove-MgUser -UserId $user.Id -ErrorAction Stop
-        }
-        catch
-        {
-            $removal = "$($_.Exception)"
-        }
-
-        $userDetails += [PSCustomObject]@{
-            id                = $user.Id
-            displayname       = $user.DisplayName
-            userprincipalname = $user.UserPrincipalName
-            createddatetime   = $user.CreatedDateTime
-            dayssincecreated  = $DaysSinceCreated
-            lastlogindate     = $LastLoginDate
-            daysinactive      = $DaysInactive
-            companyname       = $user.CompanyName
-            jobtitle          = $user.JobTitle
-            department        = $user.Department
-            cleanup           = $removal
-            TimeGenerated     = $ExpiredCred.TimeGenerated
+        if ($isToBeDeleted -eq $true) {
+            <# try {
+                Remove-MgUser -UserId $user.Id -ErrorAction Stop
+            }
+            catch
+            {
+                $removal = "$($_.Exception)"
+            } #>
+                    
+            $userDetails += [PSCustomObject]@{
+                id                = $user.id
+                displayname       = $user.displayname
+                userprincipalname = $user.userprincipalname
+                createddatetime   = $user.createddatetime
+                dayssincecreated  = $user.dayssincecreated
+                lastlogindate     = $user.lastlogindate
+                daysinactive      = $user.daysinactive
+                companyname       = $user.companyname
+                jobtitle          = $user.jobtitle
+                department        = $user.department
+                cleanup           = $removal
+                deletetype        = $deleteType
+                TimeGenerated     = $ExpiredCred.TimeGenerated
+            }
         }
     }
 }
 
+function CheckGuestUsersTemporaryEmails() {
+
+    $groupMembers = GetGroupMembers("External-Email-Temp-Test-Tenant-Access")
+    $deleteType = "temporaryemail"
+    $removal = "Removed"
+    
+    foreach ($member in $groupMembers) {
+        $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
+        
+        if ($DaysSinceCreated -gt 30) {
+            <# try {
+                Remove-MgUser -UserId $user.Id -ErrorAction Stop
+            }
+            catch
+            {
+                $removal = "$($_.Exception)"
+            } #>
+                    
+            $userDetails += [PSCustomObject]@{
+                id                = $user.id
+                displayname       = $user.displayname
+                userprincipalname = $user.userprincipalname
+                createddatetime   = $user.createddatetime
+                dayssincecreated  = $user.dayssincecreated
+                lastlogindate     = $user.lastlogindate
+                daysinactive      = $user.daysinactive
+                companyname       = $user.companyname
+                jobtitle          = $user.jobtitle
+                department        = $user.department
+                cleanup           = $removal
+                deletetype        = $deleteType
+                TimeGenerated     = $ExpiredCred.TimeGenerated
+            }
+        }
+    }
+}
+
+CheckGuestUsersExternalSync
+CheckGuestUsersTemporaryEmails
 
 Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Geuest Found.")
 
