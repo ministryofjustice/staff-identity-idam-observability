@@ -117,7 +117,7 @@ resource "azurerm_automation_schedule" "automation_schedule_guest_del" {
 }
 
 resource "azurerm_automation_job_schedule" "automation_job_schedule_guest_del" {
-  count = var.workspace_name == "DEVLEXTERNAL" ? 1 : 0
+  count = var.workspace_name == "DEVL" ? 1 : 0
 
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name

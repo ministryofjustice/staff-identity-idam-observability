@@ -94,26 +94,29 @@ function GetGroupMembers($GroupName) {
     return Get-MgGroupMember -GroupId $group.Id
 }
 
-function GetUserDetails($UserId) {
+function GetUserDetails($UserId, $JobTitle) {
     $user = Get-MgUser -UserId $member.Id -Property ID, DisplayName, UserPrincipalName, SignInActivity, CompanyName, JobTitle, Department, CreatedDateTime
 
-    $LastLoginDate = $user.SignInActivity.LastSignInDateTime
+    if ($JobTitle -eq $user.JobTitle) {
 
-    $DaysInactive = GetDaysInactive($LastLoginDate);
-    $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
+        $LastLoginDate = $user.SignInActivity.LastSignInDateTime
 
-    return  [PSCustomObject]@{
-                id                = $user.Id
-                displayname       = $user.DisplayName
-                userprincipalname = $user.UserPrincipalName
-                createddatetime   = $user.CreatedDateTime
-                dayssincecreated  = $DaysSinceCreated
-                lastlogindate     = $LastLoginDate
-                daysinactive      = $DaysInactive
-                companyname       = $user.CompanyName
-                jobtitle          = $user.JobTitle
-                department        = $user.Department
-            }
+        $DaysInactive = GetDaysInactive($LastLoginDate);
+        $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
+
+        return  [PSCustomObject]@{
+                    id                = $user.Id
+                    displayname       = $user.DisplayName
+                    userprincipalname = $user.UserPrincipalName
+                    createddatetime   = $user.CreatedDateTime
+                    dayssincecreated  = $DaysSinceCreated
+                    lastlogindate     = $LastLoginDate
+                    daysinactive      = $DaysInactive
+                    companyname       = $user.CompanyName
+                    jobtitle          = $user.JobTitle
+                    department        = $user.Department
+                }
+    }
 }
 
 function CheckGuestUsersExternalSync() {
@@ -123,7 +126,7 @@ function CheckGuestUsersExternalSync() {
     $removal = "Removed"
     
     foreach ($member in $groupMembers) {
-        $user = GetUserDetails($member.Id)
+        $user = GetUserDetails($member.Id, "Internal SilAS Test Account")
 
         $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
         
@@ -162,7 +165,7 @@ function CheckGuestUsersTemporaryEmails() {
     $removal = "Removed"
     
     foreach ($member in $groupMembers) {
-        $user = GetUserDetails($member.Id)
+        $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
         
         if ($DaysSinceCreated -gt 30) {
             <# try {
