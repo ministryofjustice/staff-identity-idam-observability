@@ -1,3 +1,8 @@
+variable "workspace_name" {
+  type        = string
+  description = "The name of the current workspace being run."
+}
+
 variable "subscription_id" {
   type        = string
   description = "Azure Subscription ID."
