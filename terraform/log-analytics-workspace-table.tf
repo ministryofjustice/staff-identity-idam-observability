@@ -354,6 +354,10 @@ resource "azapi_resource" "workspaces_table_guest_del_script" {
             type = "string"
           },
           {
+            name = "deletetype",
+            type = "string"
+          },
+          {
             name = "TimeGenerated",
             type = "dateTime"
           }

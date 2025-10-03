@@ -448,6 +448,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_guest_del"
       type = "string"
     }
     column {
+      name = "deletetype"
+      type = "string"
+    }
+    column {
       name = "TimeGenerated"
       type = "datetime"
     }
