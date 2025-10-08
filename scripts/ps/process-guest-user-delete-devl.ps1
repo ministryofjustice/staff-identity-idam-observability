@@ -42,11 +42,11 @@ function PostLogAnalyticsData()
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
-function GetDaysInactive($lastLoginDate) {
-    if ($null -eq $lastLoginDate) {
+function GetDays($date) {
+    if ($null -eq $date) {
         return 0
     }
-    return ((Get-Date) - ($lastLoginDate) | Select-Object -ExpandProperty TotalDays) -as [int]
+    return ((Get-Date) - ($date) | Select-Object -ExpandProperty TotalDays) -as [int]
 }
 
 function IsToBeDeleted($daysSinceCreated, $daysSinceLastLogin, $hasLoggedIn) {
@@ -101,8 +101,8 @@ function GetUserDetails($UserId, $JobTitle) {
 
         $LastLoginDate = $user.SignInActivity.LastSignInDateTime
 
-        $DaysInactive = GetDaysInactive($LastLoginDate);
-        $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
+        $DaysInactive = GetDays($LastLoginDate);
+        $DaysSinceCreated = GetDays($user.CreatedDateTime);
 
         return  [PSCustomObject]@{
                     id                = $user.Id
@@ -128,7 +128,7 @@ function CheckGuestUsersExternalSync() {
     foreach ($member in $groupMembers) {
         $user = GetUserDetails($member.Id, "Internal SilAS Test Account")
 
-        $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
+        $isToBeDeleted = IsToBeDeleted($user.dayssincecreated, $user.daysinactive, ($null -ne $user.lastlogindate))
         
         if ($isToBeDeleted -eq $true) {
             <# try {
@@ -167,7 +167,7 @@ function CheckGuestUsersTemporaryEmails() {
     foreach ($member in $groupMembers) {
         $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
         
-        if ($DaysSinceCreated -gt 30) {
+        if ($user.daysinactive -gt 30) {
             <# try {
                 Remove-MgUser -UserId $user.Id -ErrorAction Stop
             }
