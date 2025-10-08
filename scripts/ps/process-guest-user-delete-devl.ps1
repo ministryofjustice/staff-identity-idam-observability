@@ -42,11 +42,11 @@ function PostLogAnalyticsData()
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
-function GetDaysInactive($lastLoginDate) {
-    if ($null -eq $lastLoginDate) {
+function GetDays($date) {
+    if ($null -eq $date) {
         return 0
     }
-    return ((Get-Date) - ($lastLoginDate) | Select-Object -ExpandProperty TotalDays) -as [int]
+    return ((Get-Date) - ($date) | Select-Object -ExpandProperty TotalDays) -as [int]
 }
 
 function IsToBeDeleted($daysSinceCreated, $daysSinceLastLogin, $hasLoggedIn) {
@@ -101,8 +101,8 @@ function GetUserDetails($UserId, $JobTitle) {
 
         $LastLoginDate = $user.SignInActivity.LastSignInDateTime
 
-        $DaysInactive = GetDaysInactive($LastLoginDate);
-        $DaysSinceCreated = GetDaysInactive($user.CreatedDateTime);
+        $DaysInactive = GetDays($LastLoginDate);
+        $DaysSinceCreated = GetDays($user.CreatedDateTime);
 
         return  [PSCustomObject]@{
                     id                = $user.Id
