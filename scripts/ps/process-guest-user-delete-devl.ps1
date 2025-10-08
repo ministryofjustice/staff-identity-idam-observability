@@ -128,7 +128,7 @@ function CheckGuestUsersExternalSync() {
     foreach ($member in $groupMembers) {
         $user = GetUserDetails($member.Id, "Internal SilAS Test Account")
 
-        $isToBeDeleted = IsToBeDeleted($DaysSinceCreated, $DaysInactive, ($null -ne $LastLoginDate))
+        $isToBeDeleted = IsToBeDeleted($user.dayssincecreated, $user.daysinactive, ($null -ne $user.lastlogindate))
         
         if ($isToBeDeleted -eq $true) {
             <# try {
@@ -167,7 +167,7 @@ function CheckGuestUsersTemporaryEmails() {
     foreach ($member in $groupMembers) {
         $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
         
-        if ($DaysSinceCreated -gt 30) {
+        if ($user.daysinactive -gt 30) {
             <# try {
                 Remove-MgUser -UserId $user.Id -ErrorAction Stop
             }
