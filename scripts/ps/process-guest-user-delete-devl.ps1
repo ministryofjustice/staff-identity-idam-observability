@@ -12,44 +12,111 @@ param (
     [string]$LogTableName
 )
 
-# --- Start variables
-$userDetails = @()
+function ConnectToGraph() {
+    # Authenticate with the credentials object
+    try {
+        Write-LogInfo("Authenticate to Azure")
+        # Ensures you do not inherit an AzContext in your runbook
+        Disable-AzContextAutosave -Scope Process
+
+        # Connect to Azure with user-assigned managed identity
+        Connect-AzAccount -Identity -AccountId $MiClientId
+
+        $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
+        $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
+
+        Connect-MgGraph -Identity -ClientId $MiClientId
+        Write-LogInfo("Context is $context")
+    } 
+    catch {
+        write-error "$($_.Exception)"
+        throw "$($_.Exception)"
+    }
+}
+
+function Run {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$MiClientId,
+        [Parameter(Mandatory)]
+        [string]$DcrImmutableId,
+        [Parameter(Mandatory)]
+        [string]$DceUri,
+        [Parameter(Mandatory)]
+        [string]$LogTableName
+    )
+
+    # --- Start Script Execution
+    Write-LogInfo("Script execution started")
+
+    ConnectToGraph
+
+    $userDetails = @()
+    $userDetails += CheckGuestUsersExternalSync
+    $userDetails += CheckGuestUsersTemporaryEmails
+
+    Write-Log("$(([PSObject[]]($userDetails)).Count) Total Expired Guest(s) Found.")
+
+    Write-LogInfo("Convert Guests list to JSON")
+    $userDetailsJSON = ConvertTo-Json @($userDetails)
+
+    Write-LogInfo("Post data to Log Analytics")
+
+    GroupPostResults -postData $userDetailsJSON
+
+    Write-Log("Script execution finished")
+
+}
+
+if ($MyInvocation.InvocationName -eq 'process-guest-user-delete-devl.ps1' -or
+    $MyInvocation.InvocationName -eq $PSCommandPath) {
+    Run -MiClientId $MiClientId -DcrImmutableId $DcrImmutableId -DceUri $DceUri -LogTableName $LogTableName
+}
+#Run($MiClientId, $DcrImmutableId, $DceUri, $LogTableName)
 
 # --- Start Functions
 function Write-LogInfo($logentry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
 }
 
-function PostLogAnalyticsData()
-{   
+function PostLogAnalyticsData() {   
     param (
-        [Parameter(Mandatory=$true)][string]$logBody,
-        [Parameter(Mandatory=$true)][string]$dcrImmutableId,
-        [Parameter(Mandatory=$true)][string]$dceURI,
-        [Parameter(Mandatory=$true)][string]$table
-        )
+        [Parameter(Mandatory = $true)][string]$logBody,
+        [Parameter(Mandatory = $true)][string]$dcrImmutableId,
+        [Parameter(Mandatory = $true)][string]$dceURI,
+        [Parameter(Mandatory = $true)][string]$table
+    )
 
     # Retrieving bearer token for the system-assigned managed identity
     $bearerToken = (Get-AzAccessToken -ResourceUrl "https://monitor.azure.com").Token
 
     $headers = @{
         "Authorization" = "Bearer $bearerToken";
-        "Content-Type" = "application/json"
+        "Content-Type"  = "application/json"
     }
 
     $method = "POST"
-    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table"+"?api-version=2023-01-01";
+    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table" + "?api-version=2023-01-01";
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
-function GetDays($date) {
+function GetDays() {
+    param (
+        [Parameter(Mandatory = $true)][datetime]$date
+    )
     if ($null -eq $date) {
         return 0
     }
     return ((Get-Date) - ($date) | Select-Object -ExpandProperty TotalDays) -as [int]
 }
 
-function IsToBeDeleted($daysSinceCreated, $daysSinceLastLogin, $hasLoggedIn) {
+function IsToBeDeleted() {
+    param (
+        [Parameter(Mandatory = $true)][int]$daysSinceCreated,
+        [Parameter(Mandatory = $true)][int]$daysSinceLastLogin,
+        [Parameter(Mandatory = $true)][bool]$hasLoggedIn
+    )
     # If user has not logged in after 7 days of creation
     if ($daysSinceCreated -gt 7 && $hasLoggedIn -eq $false) {
         return $true
@@ -63,72 +130,56 @@ function IsToBeDeleted($daysSinceCreated, $daysSinceLastLogin, $hasLoggedIn) {
     return $false
 }
 
-# --- Start Script Execution
-Write-LogInfo("Script execution started")
-
-# Authenticate with the credentials object
-try 
-{
-    Write-LogInfo("Authenticate to Azure")
-    # Ensures you do not inherit an AzContext in your runbook
-    Disable-AzContextAutosave -Scope Process
-
-    # Connect to Azure with user-assigned managed identity
-    Connect-AzAccount -Identity -AccountId $MiClientId
-
-    $context = (Connect-AzAccount -Identity -AccountId $MiClientId).context
-    $context = Set-AzContext -SubscriptionName $context.Subscription -DefaultProfile $context
-
-    Connect-MgGraph -Identity -ClientId $MiClientId
-    Write-LogInfo("Context is $context")
-} 
-catch 
-{
-  write-error "$($_.Exception)"
-  throw "$($_.Exception)"
-}
-
-function GetGroupMembers($GroupName) {
+function GetGroupMembers() {
+    param (
+        [Parameter(Mandatory = $true)][string]$GroupName
+    )
     $group = Get-MgGroup -Filter "displayName eq '$GroupName'"
 
     return Get-MgGroupMember -GroupId $group.Id
 }
 
-function GetUserDetails($UserId, $JobTitle) {
-    $user = Get-MgUser -UserId $member.Id -Property ID, DisplayName, UserPrincipalName, SignInActivity, CompanyName, JobTitle, Department, CreatedDateTime
+function GetUserDetails() {
+    param (
+        [Parameter(Mandatory = $true)][string]$UserId,
+        [Parameter(Mandatory = $true)][string]$JobTitle
+    )
+    Write-Log("int " + $UserId)
+    $user = Get-MgUser -UserId $UserId -Property ID, DisplayName, UserPrincipalName, SignInActivity, CompanyName, JobTitle, Department, CreatedDateTime
 
     if ($JobTitle -eq $user.JobTitle) {
 
         $LastLoginDate = $user.SignInActivity.LastSignInDateTime
 
-        $DaysInactive = GetDays($LastLoginDate);
-        $DaysSinceCreated = GetDays($user.CreatedDateTime);
+        $DaysInactive = GetDays -date $LastLoginDate
+        $DaysSinceCreated = GetDays -date $user.CreatedDateTime
 
-        return  [PSCustomObject]@{
-                    id                = $user.Id
-                    displayname       = $user.DisplayName
-                    userprincipalname = $user.UserPrincipalName
-                    createddatetime   = $user.CreatedDateTime
-                    dayssincecreated  = $DaysSinceCreated
-                    lastlogindate     = $LastLoginDate
-                    daysinactive      = $DaysInactive
-                    companyname       = $user.CompanyName
-                    jobtitle          = $user.JobTitle
-                    department        = $user.Department
-                }
+        return [PSCustomObject]@{
+            id                = $user.Id
+            displayname       = $user.DisplayName
+            userprincipalname = $user.UserPrincipalName
+            createddatetime   = $user.CreatedDateTime
+            dayssincecreated  = $DaysSinceCreated
+            lastlogindate     = $LastLoginDate
+            daysinactive      = $DaysInactive
+            companyname       = $user.CompanyName
+            jobtitle          = $user.JobTitle
+            department        = $user.Department
+        }
     }
 }
 
 function CheckGuestUsersExternalSync() {
 
-    $groupMembers = GetGroupMembers("MoJo-External-Sync-Legal-Aid-Agency-Staff")
+    $groupMembers = GetGroupMembers -GroupName "MoJo-External-Sync-Legal-Aid-Agency-Staff"
     $deleteType = "externalsync"
     $removal = "Removed"
     
     foreach ($member in $groupMembers) {
-        $user = GetUserDetails($member.Id, "Internal SilAS Test Account")
+        Write-Log("int member " + $member.DisplayName)
+        $user = GetUserDetails -UserId $member.Id -JobTitle "Internal SilAS Test Account"
 
-        $isToBeDeleted = IsToBeDeleted($user.dayssincecreated, $user.daysinactive, ($null -ne $user.lastlogindate))
+        $isToBeDeleted = IsToBeDeleted -daysSinceCreated $user.dayssincecreated -daysSinceLastLogin $user.daysinactive -hasLoggedIn ($null -ne $user.lastlogindate)
         
         if ($isToBeDeleted -eq $true) {
             <# try {
@@ -139,7 +190,7 @@ function CheckGuestUsersExternalSync() {
                 $removal = "$($_.Exception)"
             } #>
                     
-            $userDetails += [PSCustomObject]@{
+            return [PSCustomObject]@{
                 id                = $user.id
                 displayname       = $user.displayname
                 userprincipalname = $user.userprincipalname
@@ -160,12 +211,12 @@ function CheckGuestUsersExternalSync() {
 
 function CheckGuestUsersTemporaryEmails() {
 
-    $groupMembers = GetGroupMembers("External-Email-Temp-Test-Tenant-Access")
+    $groupMembers = GetGroupMembers -GroupName "External-Email-Temp-Test-Tenant-Access"
     $deleteType = "temporaryemail"
     $removal = "Removed"
     
     foreach ($member in $groupMembers) {
-        $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
+        $user = GetUserDetails -UserId $member.Id -JobTitle "External Email SilAS Test Account"
         
         if ($user.daysinactive -gt 30) {
             <# try {
@@ -176,7 +227,7 @@ function CheckGuestUsersTemporaryEmails() {
                 $removal = "$($_.Exception)"
             } #>
                     
-            $userDetails += [PSCustomObject]@{
+            return [PSCustomObject]@{
                 id                = $user.id
                 displayname       = $user.displayname
                 userprincipalname = $user.userprincipalname
@@ -195,19 +246,12 @@ function CheckGuestUsersTemporaryEmails() {
     }
 }
 
-CheckGuestUsersExternalSync
-CheckGuestUsersTemporaryEmails
-
-Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Geuest Found.")
-
-Write-LogInfo("Convert Guests list to JSON")
-$userDetailsJSON = ConvertTo-Json @($userDetails)
-
-Write-LogInfo("Post data to Log Analytics")
-
-function GroupPostResults($postData) {
+function GroupPostResults() {
+    param (
+        [Parameter(Mandatory = $true)][string]$postData
+    )
     for ($i = 0; $i -lt $postData.Count; $i += 500) {
-        $batchNumber = ([Math]::Min($i+499, $postData.Count-1))
+        $batchNumber = ([Math]::Min($i + 499, $postData.Count - 1))
         $postDataBatch = $postData[$i..$batchNumber]
 
         $json = $postDataBatch | ConvertTo-Json -Depth 10
@@ -218,6 +262,3 @@ function GroupPostResults($postData) {
     }
 }
 
-GroupPostResults($userDetailsJSON)
-
-Write-LogInfo("Script execution finished")
