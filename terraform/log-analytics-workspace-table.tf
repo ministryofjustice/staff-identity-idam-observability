@@ -130,7 +130,7 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
           {
             name = "TimeGenerated",
             type = "dateTime"
-          }
+          },
           {
             name = "AccessReviewerGroupUsers",
             type = "string"
