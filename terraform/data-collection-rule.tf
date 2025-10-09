@@ -256,10 +256,6 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       type = "string"
     }
     column {
-      name = "TimeGenerated"
-      type = "datetime"
-    }
-    column {
       name = "AccessReviewerGroupUsers"
       type = "string"
     }
@@ -267,7 +263,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       name = "NumberOfGroupMembers"
       type = "int"
     }
-
+    column {
+      name = "TimeGenerated"
+      type = "datetime"
+    }
   }
 
   description = "Data collection rule for Access Package info"
