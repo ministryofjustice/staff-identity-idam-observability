@@ -16,71 +16,71 @@ BeforeAll {
     }
     $md_Group_Users_MoJoExternalSyncLegalAidAgencyStaff = @(
         [PSCustomObject]@{
-            DisplayName = "MoJoExternalSyncLegalAidAgencyStaff Test 1"
-            Id          = "00000000-0000-0000-0000-000000000010"
-            Mail        = "MoJoExternalSyncLegalAidAgencyStaff.test1@justice.gov.uk"
-            UserPrincipalName        = "MoJoExternalSyncLegalAidAgencyStaff.test1@justice.gov.uk"
-            SignInActivity        = [PSCustomObject]@{
+            DisplayName       = "MoJoExternalSyncLegalAidAgencyStaff Test 1"
+            Id                = "00000000-0000-0000-0000-000000000010"
+            Mail              = "MoJoExternalSyncLegalAidAgencyStaff.test1@justice.gov.uk"
+            UserPrincipalName = "MoJoExternalSyncLegalAidAgencyStaff.test1@justice.gov.uk"
+            SignInActivity    = [PSCustomObject]@{
                 LastSignInDateTime = (Get-Date)
             }
-            CompanyName        = "LAAD"
-            JobTitle        = "Internal SilAS Test Account"
+            CompanyName       = "LAAD"
+            JobTitle          = "Internal SilAS Test Account"
             Department        = "Legal Aid Agency"
-            CreatedDateTime        = (Get-Date)
+            CreatedDateTime   = (Get-Date)
         },
         [PSCustomObject]@{
-            DisplayName = "MoJoExternalSyncLegalAidAgencyStaff Test 2"
-            Id          = "00000000-0000-0000-0000-000000000020"
-            Mail        = "MoJoExternalSyncLegalAidAgencyStaff.test2@justice.gov.uk"
-            UserPrincipalName        = "MoJoExternalSyncLegalAidAgencyStaff.test2@justice.gov.uk"
-            SignInActivity        = [PSCustomObject]@{
+            DisplayName       = "MoJoExternalSyncLegalAidAgencyStaff Test 2"
+            Id                = "00000000-0000-0000-0000-000000000020"
+            Mail              = "MoJoExternalSyncLegalAidAgencyStaff.test2@justice.gov.uk"
+            UserPrincipalName = "MoJoExternalSyncLegalAidAgencyStaff.test2@justice.gov.uk"
+            SignInActivity    = [PSCustomObject]@{
                 LastSignInDateTime = (Get-Date)
             }
-            CompanyName        = "LAAD"
-            JobTitle        = "Internal SilAS Test Account"
+            CompanyName       = "LAAD"
+            JobTitle          = "Internal SilAS Test Account"
             Department        = "Legal Aid Agency"
-            CreatedDateTime        = (Get-Date)
+            CreatedDateTime   = (Get-Date)
         }
     )
     $md_Group_Users_ExternalEmailTempTestTenantAccess = @(
         [PSCustomObject]@{
-            DisplayName = "ExternalEmailTempTestTenantAccess Test 1"
-            Id          = "00000000-0000-0000-0000-000000000030"
-            Mail        = "ExternalEmailTempTestTenantAccess.test1@justice.gov.uk"
-            UserPrincipalName        = "ExternalEmailTempTestTenantAccess.test1@justice.gov.uk"
-            SignInActivity        = [PSCustomObject]@{
+            DisplayName       = "ExternalEmailTempTestTenantAccess Test 1"
+            Id                = "00000000-0000-0000-0000-000000000030"
+            Mail              = "ExternalEmailTempTestTenantAccess.test1@justice.gov.uk"
+            UserPrincipalName = "ExternalEmailTempTestTenantAccess.test1@justice.gov.uk"
+            SignInActivity    = [PSCustomObject]@{
                 LastSignInDateTime = (Get-Date).AddDays(-90)
             }
-            CompanyName        = "LAAD"
-            JobTitle        = "External Email SilAS Test Account"
+            CompanyName       = "LAAD"
+            JobTitle          = "External Email SilAS Test Account"
             Department        = "Legal Aid Agency"
-            CreatedDateTime        = (Get-Date).AddDays(-90)
+            CreatedDateTime   = (Get-Date).AddDays(-90)
         },
         [PSCustomObject]@{
-            DisplayName = "ExternalEmailTempTestTenantAccess Test 2"
-            Id          = "00000000-0000-0000-0000-000000000040"
-            Mail        = "ExternalEmailTempTestTenantAccess.test2@justice.gov.uk"
-            UserPrincipalName        = "ExternalEmailTempTestTenantAccess.test2@justice.gov.uk"
-            SignInActivity        = [PSCustomObject]@{
+            DisplayName       = "ExternalEmailTempTestTenantAccess Test 2"
+            Id                = "00000000-0000-0000-0000-000000000040"
+            Mail              = "ExternalEmailTempTestTenantAccess.test2@justice.gov.uk"
+            UserPrincipalName = "ExternalEmailTempTestTenantAccess.test2@justice.gov.uk"
+            SignInActivity    = [PSCustomObject]@{
                 LastSignInDateTime = (Get-Date)
             }
-            CompanyName        = "LAAD"
-            JobTitle        = "External Email SilAS Test Account"
+            CompanyName       = "LAAD"
+            JobTitle          = "External Email SilAS Test Account"
             Department        = "Legal Aid Agency"
-            CreatedDateTime        = (Get-Date)
+            CreatedDateTime   = (Get-Date)
         }
     )
     . $PSScriptRoot/process-guest-user-delete-devl.ps1
 }
 
 Context "When connecting to graph" {
-    BeforeEach{
+    BeforeEach {
         Mock -CommandName GroupPostResults {}
         Mock ConnectToGraph {}
 
-        Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff'} -MockWith { $md_Group_Users_MoJoExternalSyncLegalAidAgencyStaff }
+        Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff' } -MockWith { $md_Group_Users_MoJoExternalSyncLegalAidAgencyStaff }
         
-        Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'External-Email-Temp-Test-Tenant-Access'} -MockWith { $md_Group_Users_ExternalEmailTempTestTenantAccess }
+        Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'External-Email-Temp-Test-Tenant-Access' } -MockWith { $md_Group_Users_ExternalEmailTempTestTenantAccess }
         
         Mock -CommandName Get-MgUser -MockWith {
             param($UserId)
@@ -112,10 +112,10 @@ Context "When connecting to graph" {
         Assert-MockCalled GroupPostResults -Times 1 -ParameterFilter {
             $dataObject = $postData | ConvertFrom-Json
             ($dataObject.Count -eq 2) -and
-            ($dataObject | Where-Object { "00000000-0000-0000-0000-000000000030" -eq $_.Id}) -and
-            ($dataObject | Where-Object { "00000000-0000-0000-0000-000000000010" -eq $_.Id}) -and
-            (($dataObject | Where-Object { "externalsync" -eq $_.deletetype}).Count -eq 1) -and
-            (($dataObject | Where-Object { "temporaryemail" -eq $_.deletetype}).Count -eq 1)
+            ($dataObject | Where-Object { "00000000-0000-0000-0000-000000000030" -eq $_.Id }) -and
+            ($dataObject | Where-Object { "00000000-0000-0000-0000-000000000010" -eq $_.Id }) -and
+            (($dataObject | Where-Object { "externalsync" -eq $_.deletetype }).Count -eq 1) -and
+            (($dataObject | Where-Object { "temporaryemail" -eq $_.deletetype }).Count -eq 1)
         }
     }
 }
