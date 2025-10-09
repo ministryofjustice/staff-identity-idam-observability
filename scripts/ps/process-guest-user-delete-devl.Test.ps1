@@ -78,8 +78,6 @@ Context "When connecting to graph" {
         Mock -CommandName GroupPostResults {}
         Mock ConnectToGraph {}
 
-        #Mock GetGroupMembers {} -Verifiable -ParameterFilter {$version -eq 1.2}
-
         Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'MoJo-External-Sync-Legal-Aid-Agency-Staff'} -MockWith { $md_Group_Users_MoJoExternalSyncLegalAidAgencyStaff }
         
         Mock -CommandName GetGroupMembers -parameterFilter { $GroupName -eq 'External-Email-Temp-Test-Tenant-Access'} -MockWith { $md_Group_Users_ExternalEmailTempTestTenantAccess }

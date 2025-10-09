@@ -27,6 +27,10 @@ defaults:
     shell: bash
 
 jobs:
+
+  pester_tests:
+    name: Pester Tests
+    uses: ./.github/workflows/pester_test_job.yml
   
   terraform_plan_workflow:
     strategy:
