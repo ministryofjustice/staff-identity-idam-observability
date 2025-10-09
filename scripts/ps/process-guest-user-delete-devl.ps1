@@ -56,7 +56,7 @@ function Run {
     $userDetails += CheckGuestUsersExternalSync
     $userDetails += CheckGuestUsersTemporaryEmails
 
-    Write-Log("$(([PSObject[]]($userDetails)).Count) Total Expired Guest(s) Found.")
+    Write-LogInfo"$(([PSObject[]]($userDetails)).Count) Total Expired Guest(s) Found.")
 
     Write-LogInfo("Convert Guests list to JSON")
     $userDetailsJSON = ConvertTo-Json @($userDetails)
@@ -65,7 +65,7 @@ function Run {
 
     GroupPostResults -postData $userDetailsJSON
 
-    Write-Log("Script execution finished")
+    Write-LogInfo("Script execution finished")
 
 }
 
@@ -144,7 +144,7 @@ function GetUserDetails() {
         [Parameter(Mandatory = $true)][string]$UserId,
         [Parameter(Mandatory = $true)][string]$JobTitle
     )
-    Write-Log("int " + $UserId)
+    Write-LogInfo"int " + $UserId)
     $user = Get-MgUser -UserId $UserId -Property ID, DisplayName, UserPrincipalName, SignInActivity, CompanyName, JobTitle, Department, CreatedDateTime
 
     if ($JobTitle -eq $user.JobTitle) {
@@ -176,7 +176,7 @@ function CheckGuestUsersExternalSync() {
     $removal = "Removed"
     
     foreach ($member in $groupMembers) {
-        Write-Log("int member " + $member.DisplayName)
+        Write-LogInfo"int member " + $member.DisplayName)
         $user = GetUserDetails -UserId $member.Id -JobTitle "Internal SilAS Test Account"
 
         $isToBeDeleted = IsToBeDeleted -daysSinceCreated $user.dayssincecreated -daysSinceLastLogin $user.daysinactive -hasLoggedIn ($null -ne $user.lastlogindate)

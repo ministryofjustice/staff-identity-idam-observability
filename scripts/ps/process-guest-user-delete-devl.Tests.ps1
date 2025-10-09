@@ -110,7 +110,6 @@ Context "When connecting to graph" {
 
     It "Should return 2 users ready for deletion" {        
         Assert-MockCalled GroupPostResults -Times 1 -ParameterFilter {
-            Write-Log($postData)
             $dataObject = $postData | ConvertFrom-Json
             ($dataObject.Count -eq 2) -and
             ($dataObject | Where-Object { "00000000-0000-0000-0000-000000000030" -eq $_.Id}) -and
