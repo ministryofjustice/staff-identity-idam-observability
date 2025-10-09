@@ -231,11 +231,11 @@ function Get-AccessReviewGroups {
                             $groupName = $group.DisplayName
 
                             #lets get the members of this reviewgroup as well
-                            $memberids = Get-Mggroupmember -GroupId $group.id
+                            $memberids = Get-MgGroupMember -GroupId $group.id
                             
                             #if members of group found
                             if ($memberids) {
-                                write-host "Getting users from group $($groupName)"
+                                Write-Host "Getting users from group $($groupName)"
                                 $listofusers = @()
                                 foreach ($memberid in $memberids) {
                                     $user = Get-MgUser -UserId $memberid.Id
