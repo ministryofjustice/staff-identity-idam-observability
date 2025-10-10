@@ -130,4 +130,3 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule_guest_del" {
     logtablename   = azapi_resource.workspaces_table_guest_del_script.name
   }
 }
-
