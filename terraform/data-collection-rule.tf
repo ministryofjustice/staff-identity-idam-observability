@@ -264,6 +264,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       type = "int"
     }
     column {
+      name = "Assignments"
+      type = "string"
+    }
+    column {
       name = "TimeGenerated"
       type = "datetime"
     }

@@ -136,6 +136,10 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
             type = "int"
           },
           {
+            name = "Assignments",
+            type = "string"
+          },
+          {
             name = "TimeGenerated",
             type = "dateTime"
           }
