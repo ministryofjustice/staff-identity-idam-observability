@@ -167,7 +167,7 @@ function CheckGuestUsersTemporaryEmails() {
     foreach ($member in $groupMembers) {
         $user = GetUserDetails($member.Id, "External Email SilAS Test Account")
         
-        if ($user.daysinactive -gt 30) {
+        if ($user.daysinactive -gt 14) {
             <# try {
                 Remove-MgUser -UserId $user.Id -ErrorAction Stop
             }
@@ -198,7 +198,7 @@ function CheckGuestUsersTemporaryEmails() {
 CheckGuestUsersExternalSync
 CheckGuestUsersTemporaryEmails
 
-Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Geuest Found.")
+Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Guest(s) Found.")
 
 Write-LogInfo("Convert Guests list to JSON")
 $userDetailsJSON = ConvertTo-Json @($userDetails)
