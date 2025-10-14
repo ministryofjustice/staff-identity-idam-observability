@@ -64,8 +64,9 @@ function Get-EntraRolesForGroups {
     $activeRoles = Get-MgRoleManagementDirectoryRoleAssignmentScheduleInstance -All # Get all Active roles (Entra roles)
     $roleDefinitions = Get-MgRoleManagementDirectoryRoleDefinition -All # Get all active Entra role definitions (EG User administrator)
 
-    Write-Host "Eligible roles returned: $($eligibleRoles.Count)" #Counting all Eligible roles
-    Write-Host "Active roles returned: $($activeRoles.Count)" #Count all Active roles
+    Write-LogInfo("Eligible roles returned: $($eligibleRoles.Count)") #Counting all Eligible roles
+    Write-LogInfo("Active roles returned: $($activeRoles.Count)") #Count all Active roles
+    Write-LogInfo("Role Definitions returned: $($roleDefinitions.Count)") #Count all Active roles
 
     $results = @()
     #Iterating through each Eligiblerole
@@ -207,8 +208,8 @@ function Get-AccessReviewGroups {
 
     foreach ($review in $allReviews) {
         $query = $review.Scope.AdditionalProperties["query"]
-        Write-Host "Processing review: $($review.DisplayName)"
-        Write-Host "Scope query: $query"
+        Write-LogInfo("Processing review: $($review.DisplayName)")
+        Write-LogInfo("Scope query: $query")
 
         if ($query -match "accessPackageId eq '([0-9a-fA-F-]+)'") {
             $extractedId = $matches[1]
@@ -227,35 +228,47 @@ function Get-AccessReviewGroups {
                             Write-Host "Group ID extracted: $groupId"
 
                             # Get group display name
-                            $group = Get-MgGroup -GroupId $groupId
-                            $groupName = $group.DisplayName
+                            try {
+                                
+                                $group = Get-MgGroup -GroupId $groupId
+                                $groupName = $group.DisplayName
 
-                            #lets get the members of this reviewgroup as well
-                            $memberids = Get-MgGroupMember -GroupId $group.id
-                            
-                            #if members of group found
-                            if ($memberids) {
-                                Write-Host "Getting users from group $($groupName)"
-                                $listofusers = @()
-                                foreach ($memberid in $memberids) {
-                                    $user = Get-MgUser -UserId $memberid.Id
-                                    $listofusers += [PSCustomObject]@{
-                                    UserPrincipalName = $user.UserPrincipalName
-                                    DisplayName       = $user.DisplayName
-                                    Id                = $user.Id
+                                #lets get the members of this reviewgroup as well
+                                $memberids = Get-MgGroupMember -GroupId $group.id
+                                
+                                #if members of group found
+                                if ($memberids) {
+                                    Write-Host "Getting users from group $($groupName)"
+                                    $listofusers = @()
+                                    foreach ($memberid in $memberids) {
+                                        $user = Get-MgUser -UserId $memberid.Id
+                                        $listofusers += [PSCustomObject]@{
+                                        UserPrincipalName = $user.UserPrincipalName
+                                        DisplayName       = $user.DisplayName
+                                        Id                = $user.Id
+                                        }
                                     }
+                                } #if the group has members, do this
+                                else {
+                                    write-host "No members in reviewer group"
+                                    $listofusers = "No members in group"
                                 }
-                            } #if the group has members, do this
-                            else {
-                                write-host "No members in reviewer group"
-                                $listofusers = "No members in group"
-                            }
 
-                            $reviewerGroupsList += [PSCustomObject]@{
-                                AccessPackageID = $extractedId
-                                ReviewerGroupName = $groupName
-                                ReviewerGroupId   = $groupId
-                                ListOfUsers = ($listofusers | ConvertTo-Json -Compress)
+                                $reviewerGroupsList += [PSCustomObject]@{
+                                    AccessPackageID = $extractedId
+                                    ReviewerGroupName = $groupName
+                                    ReviewerGroupId   = $groupId
+                                    ListOfUsers = ($listofusers | ConvertTo-Json -Compress)
+                                }
+                            
+                            } catch {
+                                Write-Host "Reviewer query not resolvable: $reviewerQuery"
+                                $reviewerGroupsList += [PSCustomObject]@{
+                                    AccessPackageID     = $extractedId
+                                    ReviewerGroupName   = "Reviewer query not resolvable"
+                                    ReviewerGroupId     = "No reviewer"
+                                    ListOfUsers = $listofusers
+                                }
                             }
                         } else {
                             Write-Host "Reviewer query not resolvable: $reviewerQuery"
@@ -285,11 +298,11 @@ function Get-AccessReviewGroups {
 function Get-AccessReviewAssignment {
 
     try {
-        Write-Host "Trying to retrieve access packages"
+        Write-LogInfo("Trying to retrieve access packages")
         $allPackages = Get-MgEntitlementManagementAccessPackage
     }
     catch {
-        Write-Host "Unable to retrieve packages"
+        Write-LogInfo("Unable to retrieve packages")
     }
 
     if ($allPackages) {
