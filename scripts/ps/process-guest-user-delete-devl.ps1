@@ -198,7 +198,7 @@ function CheckGuestUsersTemporaryEmails() {
 CheckGuestUsersExternalSync
 CheckGuestUsersTemporaryEmails
 
-Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Geuest Found.")
+Write-LogInfo("$(([PSObject[]]($userDetails)).Count) Total Expired Guest(s) Found.")
 
 Write-LogInfo("Convert Guests list to JSON")
 $userDetailsJSON = ConvertTo-Json @($userDetails)
