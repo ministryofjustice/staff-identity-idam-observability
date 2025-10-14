@@ -414,9 +414,10 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             RoleDescription            = "No description"
             AssignmentType             = "No assignment type for this resource"
             RoleStatus                 = "This resource does not have a role"
-            AccessReviewerGroupUsers   = $reviewer.listofusers
+            ListOfUsers                = $reviewer.listofusers
             ReviewerGroupName          = $reviewer.ReviewerGroupName
             ReviewerGroupId            = $reviewer.ReviewerGroupId
+            AccessReviewerGroupUsers   = $reviewer.listofusers
             Assignments                = $assignments
         }
     }

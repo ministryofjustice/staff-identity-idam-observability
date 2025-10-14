@@ -232,6 +232,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       type = "string"
     }
     column {
+      name = "NumberOfGroupMembers"
+      type = "int"
+    }
+    column {
       name = "RoleName"
       type = "string"
     }
@@ -248,6 +252,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
       type = "string"
     }
     column {
+      name = "ListOfUsers"
+      type = "int"
+    }
+    column {
       name = "ReviewerGroupName"
       type = "string"
     }
@@ -258,10 +266,6 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
     column {
       name = "AccessReviewerGroupUsers"
       type = "string"
-    }
-    column {
-      name = "NumberOfGroupMembers"
-      type = "int"
     }
     column {
       name = "Assignments"
