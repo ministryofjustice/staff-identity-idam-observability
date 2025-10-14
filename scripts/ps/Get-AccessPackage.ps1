@@ -282,6 +282,51 @@ function Get-AccessReviewGroups {
     return $reviewerGroupsList
 }
 
+function Get-AccessReviewAssignment {
+
+    try {
+        Write-Host "Trying to retrieve access packages"
+        $allPackages = Get-MgEntitlementManagementAccessPackage
+    }
+    catch {
+        Write-Host "Unable to retrieve packages"
+    }
+
+    if ($allPackages) {
+        #Empty array of all the assignments
+        $ListOfAssignments = @()
+        foreach ($package in $allPackages) {
+            try {
+                Write-Host "Trying to get assignments on access package"
+                $assignments = Get-MgEntitlementManagementAssignment -Filter "accessPackage/id eq '$($package.id)'" -ExpandProperty target
+            }
+            catch {
+                Write-Host "Unable to get assignment information."
+            }
+            if ($assignments) {
+                Write-Host "Iterate through the assignments and add them to the array"
+                foreach ($assignment in $assignments) {
+                    $ListOfAssignments += [PSCustomObject]@{
+                        AccessPackage = $Package.DisplayName
+                        AssignmentEmail = $assignment.target.email
+                    }
+                }
+            }
+            else {
+                Write-Host "Access Package has no assignments"
+                $ListOfAssignments += [PSCustomObject]@{
+                    AccessPackage = $Package.DisplayName
+                    AssignmentEmail = "Access package has no assignments"
+                }
+            }
+        }
+    }
+    else {
+        Write-Host "Unable to get Assigment details"
+    }
+    return $ListOfAssignments
+}
+
 #Run Azure authentication
 
 Write-LogInfo("Script execution started")
@@ -307,6 +352,9 @@ catch {
 
 #Get the groups / apps on the access packages
 $accesspackageResourceinfo = Get-AccessPackageResources
+
+#List of who has access to which access package
+$accesspackageassignments = Get-AccessReviewAssignment
     
 #Unique Access package Group ID's into variable
 $groupids = $accesspackageResourceinfo.GroupID | Select-Object -Unique
@@ -321,10 +369,22 @@ $accessReviewers = Get-AccessReviewGroups -AccessPackageIDs $accessPackageIDs
 #Combining $accesspackageResourceinfo, $entraRoles and $accessReviewers into useful data
 $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
     $accessPackageID = $package.AccessPackageID
+
     $groupID = $package.GroupID
 
     $roles = $entraRoles | Where-Object { $_.GroupID -eq $groupID }
+
     $reviewer = $accessReviewers | Where-Object { $_.AccessPackageID -eq $accessPackageID }
+
+    $assignments = $accesspackageassignments  | Where-Object { $_.AccessPackage -eq $package.accessPackage }
+
+    $assignments = if ($null -ne $assignments.AssignmentEmail) {
+    if ($assignments.AssignmentEmail -is [array]) {
+        $assignments.AssignmentEmail -join ", "
+    } else {
+        $assignments.AssignmentEmail
+    }
+}
 
     # If no roles found, still output one row
     if ($roles.Count -eq 0) {
@@ -344,6 +404,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             AccessReviewerGroupUsers   = $reviewer.listofusers
             ReviewerGroupName          = $reviewer.ReviewerGroupName
             ReviewerGroupId            = $reviewer.ReviewerGroupId
+            Assignments                = $assignments
         }
     }
     else {
@@ -365,6 +426,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
                 ReviewerGroupName          = $reviewer.ReviewerGroupName
                 ReviewerGroupId            = $reviewer.ReviewerGroupId
                 AccessReviewerGroupUsers   = $reviewer.listofusers
+                Assignments                = $assignments
             }
         }
     }
