@@ -253,7 +253,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
     }
     column {
       name = "ListOfUsers"
-      type = "int"
+      type = "string"
     }
     column {
       name = "ReviewerGroupName"
@@ -265,7 +265,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
     }
     column {
       name = "AccessReviewerGroupUsers"
-      type = "int"
+      type = "string"
     }
     column {
       name = "Assignments"

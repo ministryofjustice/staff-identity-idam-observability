@@ -129,7 +129,7 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
           },
           {
             name = "ListOfUsers",
-            type = "int"
+            type = "string"
           },
           {
             name = "ReviewerGroupName",
@@ -141,7 +141,7 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
           },
           {
             name = "AccessReviewerGroupUsers",
-            type = "int"
+            type = "string"
           },
           {
             name = "Assignments",
