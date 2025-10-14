@@ -265,7 +265,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_AccessPack
     }
     column {
       name = "AccessReviewerGroupUsers"
-      type = "string"
+      type = "int"
     }
     column {
       name = "Assignments"
