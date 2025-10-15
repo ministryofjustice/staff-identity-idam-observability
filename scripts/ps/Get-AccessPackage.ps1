@@ -247,6 +247,7 @@ function Get-AccessReviewGroups {
                                             Id                = $user.Id
                                         }
                                     }
+                                    $listofusers = ($listofusers | ConvertTo-Json -Depth 10 -Compress) -join ''
                                 } #if the group has members, do this
                                 else {
                                     write-host "No members in reviewer group"
@@ -254,38 +255,41 @@ function Get-AccessReviewGroups {
                                 }
 
                                 $reviewerGroupsList += [PSCustomObject]@{
-                                    AccessPackageID = $extractedId
+                                    AccessPackageID   = $extractedId
                                     ReviewerGroupName = $groupName
                                     ReviewerGroupId   = $groupId
-                                    ListOfUsers = ($listofusers | ConvertTo-Json -Compress)
+                                    ListOfUsers       = $listofusers
                                 }
                             
-                            } catch {
+                            }
+                            catch {
                                 Write-Host "Reviewer query not resolvable: $reviewerQuery"
                                 $reviewerGroupsList += [PSCustomObject]@{
-                                    AccessPackageID     = $extractedId
-                                    ReviewerGroupName   = "Reviewer query not resolvable"
-                                    ReviewerGroupId     = "No reviewer"
-                                    ListOfUsers = ($listofusers | ConvertTo-Json -Compress)
+                                    AccessPackageID   = $extractedId
+                                    ReviewerGroupName = "Reviewer query not resolvable"
+                                    ReviewerGroupId   = "No reviewer"
+                                    ListOfUsers       = "No members in group"
                                 }
                             }
-                        } else {
+                        }
+                        else {
                             Write-Host "Reviewer query not resolvable: $reviewerQuery"
                             $reviewerGroupsList += [PSCustomObject]@{
-                                AccessPackageID     = $extractedId
-                                ReviewerGroupName   = "Reviewer query not resolvable"
-                                ReviewerGroupId     = "No reviewer"
-                                ListOfUsers         = "No members in group"
+                                AccessPackageID   = $extractedId
+                                ReviewerGroupName = "Reviewer query not resolvable"
+                                ReviewerGroupId   = "No reviewer"
+                                ListOfUsers       = "No members in group"
                             }
                         }
                     }
-                } else {
+                }
+                else {
                     Write-Host "No reviewers assigned to this review."
                     $reviewerGroupsList += [PSCustomObject]@{
-                        AccessPackageID     = $extractedId
-                        ReviewerGroupName   = "No reviewers assigned"
-                        ReviewerGroupId     = "No reviewer assigned"
-                        ListOfUsers         = "No members in group"
+                        AccessPackageID   = $extractedId
+                        ReviewerGroupName = "No reviewers assigned"
+                        ReviewerGroupId   = "No reviewer assigned"
+                        ListOfUsers       = "No members in group"
                     }
                 }
             }
@@ -400,7 +404,15 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
         }
     }
 
-    # If no roles found, still output one row
+    $listOfUsersParsed = if ($null -ne $reviewer.ListOfUsers) {
+        if ($reviewer.ListOfUsers -is [System.Object[]]) {
+            "No members in group"
+        }
+    }
+    else {
+        "No members in group"
+    }
+
     if ($roles.Count -eq 0) {
         [PSCustomObject]@{
             AccessPackage            = $package.AccessPackage
@@ -415,10 +427,10 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             RoleDescription          = "No description"
             AssignmentType           = "No assignment type for this resource"
             RoleStatus               = "This resource does not have a role"
-            ListOfUsers              = $reviewer.listofusers
-            ReviewerGroupName        = $reviewer.ReviewerGroupName
-            ReviewerGroupId          = $reviewer.ReviewerGroupId
-            AccessReviewerGroupUsers = $reviewer.listofusers
+            ListOfUsers              = $listOfUsersParsed
+            ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
+            ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
+            AccessReviewerGroupUsers = $listOfUsersParsed
             Assignments              = $assignments
         }
     }
@@ -437,10 +449,10 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
                 RoleDescription          = $role.RoleDescription
                 AssignmentType           = $role.AssignmentType
                 RoleStatus               = $role.RoleStatus
-                ListOfUsers              = $reviewer.listofusers
-                ReviewerGroupName        = $reviewer.ReviewerGroupName
-                ReviewerGroupId          = $reviewer.ReviewerGroupId
-                AccessReviewerGroupUsers = $reviewer.listofusers
+                ListOfUsers              = $listOfUsersParsed
+                ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
+                ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
+                AccessReviewerGroupUsers = $listOfUsersParsed
                 Assignments              = $assignments
             }
         }
