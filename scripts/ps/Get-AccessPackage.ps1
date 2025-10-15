@@ -396,7 +396,14 @@ $accessReviewers = Get-AccessReviewGroups -AccessPackageIDs $accessPackageIDs
 $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
     $accessPackageID = $package.AccessPackageID
 
+    #If package has a group id
+    if ($package.Groupid) {
     $groupID = $package.GroupID
+    }
+    #If no group ID, set to this for clarity
+    else {
+        $groupID = "No group on this access package"
+    }
 
     $roles = $entraRoles | Where-Object { $_.GroupID -eq $groupID }
 
@@ -404,23 +411,23 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
 
     $assignments = $accesspackageassignments  | Where-Object { $_.AccessPackage -eq $package.accessPackage }
 
-    $assignments = if ($null -ne $assignments.AssignmentEmail) {
-        if ($assignments.AssignmentEmail -is [array]) {
-            $assignments.AssignmentEmail -join ", "
-        }
-        else {
-            $assignments.AssignmentEmail
-        }
-    }
-
-    $listOfUsersParsed = if ($null -ne $reviewer.ListOfUsers) {
-        if ($reviewer.ListOfUsers -is [System.Object[]]) {
-            "No members in group"
-        }
+    
+$assignmentsFormatted = ""
+if ($null -ne $assignments.AssignmentEmail) {
+    if ($assignments.AssignmentEmail -is [array]) {
+        $assignmentsFormatted = $assignments.AssignmentEmail -join ", "
     }
     else {
-        "No members in group"
+        $assignmentsFormatted = $assignments.AssignmentEmail
     }
+}
+
+
+   
+$listOfUsersParsed = "No members in group"
+if ($null -ne $reviewer.ListOfUsers -and $reviewer.ListOfUsers -isnot [System.Object[]]) {
+    $listOfUsersParsed = $reviewer.ListOfUsers
+}
 
     if ($roles.Count -eq 0) {
         [PSCustomObject]@{
@@ -440,7 +447,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
             ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
             AccessReviewerGroupUsers = $listOfUsersParsed
-            Assignments              = $assignments
+            Assignments              = $assignmentsFormatted
         }
     }
     else {
@@ -462,7 +469,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
                 ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
                 ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
                 AccessReviewerGroupUsers = $listOfUsersParsed
-                Assignments              = $assignments
+                Assignments              = $assignmentsFormatted
             }
         }
     }
