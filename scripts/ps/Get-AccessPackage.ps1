@@ -21,7 +21,7 @@ function Write-LogInfo($logentry) {
 #Function to post to log analytics in stages
 function GroupPostResults($postData) {
     for ($i = 0; $i -lt $postData.Count; $i += 500) {
-        $batchNumber = ([Math]::Min($i+499, $postData.Count-1))
+        $batchNumber = ([Math]::Min($i + 499, $postData.Count - 1))
         $postDataBatch = $postData[$i..$batchNumber]
 
         $json = $postDataBatch | ConvertTo-Json -Depth 10
@@ -33,25 +33,24 @@ function GroupPostResults($postData) {
 }
 
 # Post data function
-function PostLogAnalyticsData()
-{   
+function PostLogAnalyticsData() {   
     param (
-        [Parameter(Mandatory=$true)][string]$logBody,
-        [Parameter(Mandatory=$true)][string]$dcrImmutableId,
-        [Parameter(Mandatory=$true)][string]$dceURI,
-        [Parameter(Mandatory=$true)][string]$table
-        )
+        [Parameter(Mandatory = $true)][string]$logBody,
+        [Parameter(Mandatory = $true)][string]$dcrImmutableId,
+        [Parameter(Mandatory = $true)][string]$dceURI,
+        [Parameter(Mandatory = $true)][string]$table
+    )
 
     # Retrieving bearer token for the system-assigned managed identity
     $bearerToken = (Get-AzAccessToken -ResourceUrl "https://monitor.azure.com").Token
 
     $headers = @{
         "Authorization" = "Bearer $bearerToken";
-        "Content-Type" = "application/json"
+        "Content-Type"  = "application/json"
     }
 
     $method = "POST"
-    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table"+"?api-version=2023-01-01";
+    $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table" + "?api-version=2023-01-01";
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
@@ -64,8 +63,9 @@ function Get-EntraRolesForGroups {
     $activeRoles = Get-MgRoleManagementDirectoryRoleAssignmentScheduleInstance -All # Get all Active roles (Entra roles)
     $roleDefinitions = Get-MgRoleManagementDirectoryRoleDefinition -All # Get all active Entra role definitions (EG User administrator)
 
-    Write-Host "Eligible roles returned: $($eligibleRoles.Count)" #Counting all Eligible roles
-    Write-Host "Active roles returned: $($activeRoles.Count)" #Count all Active roles
+    Write-LogInfo("Eligible roles returned: $($eligibleRoles.Count)") #Counting all Eligible roles
+    Write-LogInfo("Active roles returned: $($activeRoles.Count)") #Count all Active roles
+    Write-LogInfo("Role Definitions returned: $($roleDefinitions.Count)") #Count all Active roles
 
     $results = @()
     #Iterating through each Eligiblerole
@@ -142,14 +142,14 @@ function Get-AccessPackageResources {
                 $group = Get-MgGroup -GroupId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
                 $mems = Get-MgGroupMember -GroupId $group.id
                 $exportList += [PSCustomObject][Ordered]@{
-                    AccessPackage    = $accessPackage.DisplayName
-                    AccessPackageID  = $accessPackage.Id
-                    Displayname      = $group.DisplayName
-                    Description      = $group.Description
-                    ScopeType        = "EntraGroup"  
-                    GroupID          = $group.id
-                    CatalogName      = $catalogName
-                    NumberOfMembers  = $mems.Count    
+                    AccessPackage   = $accessPackage.DisplayName
+                    AccessPackageID = $accessPackage.Id
+                    Displayname     = $group.DisplayName
+                    Description     = $group.Description
+                    ScopeType       = "EntraGroup"  
+                    GroupID         = $group.id
+                    CatalogName     = $catalogName
+                    NumberOfMembers = $mems.Count    
                 }
 
             }
@@ -161,12 +161,12 @@ function Get-AccessPackageResources {
                     #Get the service principal
                     $app = Get-MgServicePrincipal -ServicePrincipalId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
                     $exportList += [PSCustomObject][Ordered]@{
-                        AccessPackage    = $accessPackage.DisplayName
-                        AccessPackageID  = $accessPackage.Id
-                        Displayname      = $app.DisplayName
-                        Description      = "Enterprise application"
-                        ScopeType        = "ServicePrincipal"
-                        CatalogName      = $catalogName
+                        AccessPackage   = $accessPackage.DisplayName
+                        AccessPackageID = $accessPackage.Id
+                        Displayname     = $app.DisplayName
+                        Description     = "Enterprise application"
+                        ScopeType       = "ServicePrincipal"
+                        CatalogName     = $catalogName
                     }
 
                 }
@@ -177,16 +177,16 @@ function Get-AccessPackageResources {
                     try {
                         $app = Get-MgApplicaiton -Applicationid $scope.OriginId #Forces terminating error to go to catch
                         $exportList += [PSCustomObject][Ordered]@{
-                            AccessPackage    = $accessPackage.DisplayName
-                            AccessPackageID  = $accessPackage.Id
-                            Displayname      = $app.DisplayName
-                            Description      = "App Registration"
-                            ScopeType        = "AppRegistration"
-                            CatalogName      = $catalogName 
+                            AccessPackage   = $accessPackage.DisplayName
+                            AccessPackageID = $accessPackage.Id
+                            Displayname     = $app.DisplayName
+                            Description     = "App Registration"
+                            ScopeType       = "AppRegistration"
+                            CatalogName     = $catalogName 
                         }
                     }
                     catch {
-                       write-host "No Groups, or apps found"
+                        write-host "No Groups, or apps found"
                     }
 
 
@@ -207,8 +207,8 @@ function Get-AccessReviewGroups {
 
     foreach ($review in $allReviews) {
         $query = $review.Scope.AdditionalProperties["query"]
-        Write-Host "Processing review: $($review.DisplayName)"
-        Write-Host "Scope query: $query"
+        Write-LogInfo("Processing review: $($review.DisplayName)")
+        Write-LogInfo("Scope query: $query")
 
         if ($query -match "accessPackageId eq '([0-9a-fA-F-]+)'") {
             $extractedId = $matches[1]
@@ -225,54 +225,71 @@ function Get-AccessReviewGroups {
                         if ($reviewerQuery -match "/groups/([0-9a-fA-F-]+)/transitiveMembers") {
                             $groupId = $matches[1]
                             Write-Host "Group ID extracted: $groupId"
+                            $listofusers = @()
 
                             # Get group display name
-                            $group = Get-MgGroup -GroupId $groupId
-                            $groupName = $group.DisplayName
+                            try {
+                                
+                                $group = Get-MgGroup -GroupId $groupId
+                                $groupName = $group.DisplayName
 
-                            #lets get the members of this reviewgroup as well
-                            $memberids = Get-MgGroupMember -GroupId $group.id
-                            
-                            #if members of group found
-                            if ($memberids) {
-                                Write-Host "Getting users from group $($groupName)"
-                                $listofusers = @()
-                                foreach ($memberid in $memberids) {
-                                    $user = Get-MgUser -UserId $memberid.Id
-                                    $listofusers += [PSCustomObject]@{
-                                    UserPrincipalName = $user.UserPrincipalName
-                                    DisplayName       = $user.DisplayName
-                                    Id                = $user.Id
+                                #lets get the members of this reviewgroup as well
+                                $memberids = Get-MgGroupMember -GroupId $group.id
+                                
+                                #if members of group found
+                                if ($memberids) {
+                                    Write-Host "Getting users from group $($groupName)"
+                                    foreach ($memberid in $memberids) {
+                                        $user = Get-MgUser -UserId $memberid.Id
+                                        $listofusers += [PSCustomObject]@{
+                                            UserPrincipalName = $user.UserPrincipalName
+                                            DisplayName       = $user.DisplayName
+                                            Id                = $user.Id
+                                        }
                                     }
+                                    $listofusers = ($listofusers | ConvertTo-Json -Depth 10 -Compress) -join ''
+                                } #if the group has members, do this
+                                else {
+                                    write-host "No members in reviewer group"
+                                    $listofusers = "No members in group"
                                 }
-                            } #if the group has members, do this
-                            else {
-                                write-host "No members in reviewer group"
-                                $listofusers = "No members in group"
-                            }
 
-                            $reviewerGroupsList += [PSCustomObject]@{
-                                AccessPackageID = $extractedId
-                                ReviewerGroupName = $groupName
-                                ReviewerGroupId   = $groupId
-                                ListOfUsers = ($listofusers | ConvertTo-Json -Compress)
+                                $reviewerGroupsList += [PSCustomObject]@{
+                                    AccessPackageID   = $extractedId
+                                    ReviewerGroupName = $groupName
+                                    ReviewerGroupId   = $groupId
+                                    ListOfUsers       = $listofusers
+                                }
+                            
                             }
-                        } else {
+                            catch {
+                                Write-Host "Reviewer query not resolvable: $reviewerQuery"
+                                $reviewerGroupsList += [PSCustomObject]@{
+                                    AccessPackageID   = $extractedId
+                                    ReviewerGroupName = "Reviewer query not resolvable"
+                                    ReviewerGroupId   = "No reviewer"
+                                    ListOfUsers       = "No members in group"
+                                }
+                            }
+                        }
+                        else {
                             Write-Host "Reviewer query not resolvable: $reviewerQuery"
                             $reviewerGroupsList += [PSCustomObject]@{
-                                AccessPackageID     = $extractedId
-                                ReviewerGroupName   = "Reviewer query not resolvable"
-                                ReviewerGroupId     = "No reviewer"
-                                ListOfUsers = $listofusers
+                                AccessPackageID   = $extractedId
+                                ReviewerGroupName = "Reviewer query not resolvable"
+                                ReviewerGroupId   = "No reviewer"
+                                ListOfUsers       = "No members in group"
                             }
                         }
                     }
-                } else {
+                }
+                else {
                     Write-Host "No reviewers assigned to this review."
                     $reviewerGroupsList += [PSCustomObject]@{
-                        AccessPackageID     = $extractedId
-                        ReviewerGroupName   = "No reviewers assigned"
-                        ReviewerGroupId     = "No reviewer assigned"
+                        AccessPackageID   = $extractedId
+                        ReviewerGroupName = "No reviewers assigned"
+                        ReviewerGroupId   = "No reviewer assigned"
+                        ListOfUsers       = "No members in group"
                     }
                 }
             }
@@ -285,11 +302,11 @@ function Get-AccessReviewGroups {
 function Get-AccessReviewAssignment {
 
     try {
-        Write-Host "Trying to retrieve access packages"
+        Write-LogInfo("Trying to retrieve access packages")
         $allPackages = Get-MgEntitlementManagementAccessPackage
     }
     catch {
-        Write-Host "Unable to retrieve packages"
+        Write-LogInfo("Unable to retrieve packages")
     }
 
     if ($allPackages) {
@@ -307,7 +324,7 @@ function Get-AccessReviewAssignment {
                 Write-Host "Iterate through the assignments and add them to the array"
                 foreach ($assignment in $assignments) {
                     $ListOfAssignments += [PSCustomObject]@{
-                        AccessPackage = $Package.DisplayName
+                        AccessPackage   = $Package.DisplayName
                         AssignmentEmail = $assignment.target.email
                     }
                 }
@@ -315,7 +332,7 @@ function Get-AccessReviewAssignment {
             else {
                 Write-Host "Access Package has no assignments"
                 $ListOfAssignments += [PSCustomObject]@{
-                    AccessPackage = $Package.DisplayName
+                    AccessPackage   = $Package.DisplayName
                     AssignmentEmail = "Access package has no assignments"
                 }
             }
@@ -379,54 +396,64 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
     $assignments = $accesspackageassignments  | Where-Object { $_.AccessPackage -eq $package.accessPackage }
 
     $assignments = if ($null -ne $assignments.AssignmentEmail) {
-    if ($assignments.AssignmentEmail -is [array]) {
-        $assignments.AssignmentEmail -join ", "
-    } else {
-        $assignments.AssignmentEmail
+        if ($assignments.AssignmentEmail -is [array]) {
+            $assignments.AssignmentEmail -join ", "
+        }
+        else {
+            $assignments.AssignmentEmail
+        }
     }
-}
 
-    # If no roles found, still output one row
+    $listOfUsersParsed = if ($null -ne $reviewer.ListOfUsers) {
+        if ($reviewer.ListOfUsers -is [System.Object[]]) {
+            "No members in group"
+        }
+    }
+    else {
+        "No members in group"
+    }
+
     if ($roles.Count -eq 0) {
         [PSCustomObject]@{
-            AccessPackage              = $package.AccessPackage
-            AccessPackageID            = $accessPackageID
-            DisplayName                = $package.DisplayName
-            Description                = $package.Description
-            ScopeType                  = $package.ScopeType
-            GroupID                    = $groupID
-            CatalogName                = $package.CatalogName
-            NumberOfGroupMembers       = [int]$package.NumberOfMembers
-            RoleName                   = "This resource does not have a role"
-            RoleDescription            = "No description"
-            AssignmentType             = "No assignment type for this resource"
-            RoleStatus                 = "This resource does not have a role"
-            AccessReviewerGroupUsers   = $reviewer.listofusers
-            ReviewerGroupName          = $reviewer.ReviewerGroupName
-            ReviewerGroupId            = $reviewer.ReviewerGroupId
-            Assignments                = $assignments
+            AccessPackage            = $package.AccessPackage
+            AccessPackageID          = $accessPackageID
+            DisplayName              = $package.DisplayName
+            Description              = $package.Description
+            ScopeType                = $package.ScopeType
+            GroupID                  = $groupID
+            CatalogName              = $package.CatalogName
+            NumberOfGroupMembers     = [int]$package.NumberOfMembers
+            RoleName                 = "This resource does not have a role"
+            RoleDescription          = "No description"
+            AssignmentType           = "No assignment type for this resource"
+            RoleStatus               = "This resource does not have a role"
+            ListOfUsers              = $listOfUsersParsed
+            ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
+            ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
+            AccessReviewerGroupUsers = $listOfUsersParsed
+            Assignments              = $assignments
         }
     }
     else {
         foreach ($role in $roles) {
             [PSCustomObject]@{
-                AccessPackage              = $package.AccessPackage
-                AccessPackageID            = $accessPackageID
-                DisplayName                = $package.DisplayName
-                Description                = $package.Description
-                ScopeType                  = $package.ScopeType
-                GroupID                    = $groupID
-                CatalogName                = $package.CatalogName 
-                NumberOfGroupMembers       = [int]$package.NumberOfMembers
-                RoleName                   = $role.RoleName
-                RoleDescription            = $role.RoleDescription
-                AssignmentType             = $role.AssignmentType
-                RoleStatus                 = $role.RoleStatus
-                ListOfUsers                = $reviewer.listofusers
-                ReviewerGroupName          = $reviewer.ReviewerGroupName
-                ReviewerGroupId            = $reviewer.ReviewerGroupId
-                AccessReviewerGroupUsers   = $reviewer.listofusers
-                Assignments                = $assignments
+                AccessPackage            = $package.AccessPackage
+                AccessPackageID          = $accessPackageID
+                DisplayName              = $package.DisplayName
+                Description              = $package.Description
+                ScopeType                = $package.ScopeType
+                GroupID                  = $groupID
+                CatalogName              = $package.CatalogName 
+                NumberOfGroupMembers     = [int]$package.NumberOfMembers
+                RoleName                 = $role.RoleName
+                RoleDescription          = $role.RoleDescription
+                AssignmentType           = $role.AssignmentType
+                RoleStatus               = $role.RoleStatus
+                ListOfUsers              = $listOfUsersParsed
+                ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
+                ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
+                AccessReviewerGroupUsers = $listOfUsersParsed
+                Assignments              = $assignments
             }
         }
     }

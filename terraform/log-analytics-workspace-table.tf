@@ -104,6 +104,10 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
             type = "string"
           },
           {
+            name = "NumberOfGroupMembers",
+            type = "int"
+          },
+          {
             name = "RoleName",
             type = "string"
           },
@@ -120,6 +124,14 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
             type = "string"
           },
           {
+            name = "RoleStatus",
+            type = "string"
+          },
+          {
+            name = "ListOfUsers",
+            type = "string"
+          },
+          {
             name = "ReviewerGroupName",
             type = "string"
           },
@@ -130,10 +142,6 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
           {
             name = "AccessReviewerGroupUsers",
             type = "string"
-          },
-          {
-            name = "NumberOfGroupMembers",
-            type = "int"
           },
           {
             name = "Assignments",
