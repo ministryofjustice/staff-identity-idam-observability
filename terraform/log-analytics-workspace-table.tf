@@ -124,10 +124,6 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
             type = "string"
           },
           {
-            name = "RoleStatus",
-            type = "string"
-          },
-          {
             name = "ListOfUsers",
             type = "string"
           },
