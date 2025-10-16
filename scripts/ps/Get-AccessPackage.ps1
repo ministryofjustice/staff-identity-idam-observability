@@ -112,88 +112,97 @@ function Get-AccessPackageResources {
     # Initialize an empty array to store the final data
     $exportList = @()
 
-
-    #Get info on all access packages
+    # Get info on all access packages
     $allPackages = Get-MgEntitlementManagementAccessPackage
 
-
-    #Having to expand each individually to get the resource role scope due to a limitation in graph
+    # Expand each individually to get the resource role scope due to a limitation in Graph
     $expandedPackages = foreach ($pkg in $allPackages) {
         Get-MgEntitlementManagementAccessPackage -AccessPackageId $pkg.Id -ExpandProperty "resourceRoleScopes(`$expand=scope,role)", "catalog"
-    } 
+    }
 
     # Track how many access packages are in this catalog
-    $totalAccessPackagesInCatalog = $accessPackages.count
+    $totalAccessPackagesInCatalog = $expandedPackages.Count
 
-    #Iteration counter in for loop
+    # Iteration counter in for loop
     $counter = 1
 
-
-    #Loop through each access package and get the group
+    # Loop through each access package and get the group
     foreach ($accessPackage in $expandedPackages) {
         Write-Host "`t[$counter/$($totalAccessPackagesInCatalog)][Access Package: $($accessPackage.DisplayName)]"
         $counter++
-
-
-        #Time to iterate throught he scopes (Groups, apps) in the resourcerolescopes
-        foreach ($scope in $accessPackage.ResourceRoleScopes.Scope) {
-            try {
-                $catalogName = $accessPackage.Catalog.DisplayName
-                $group = Get-MgGroup -GroupId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
-                $mems = Get-MgGroupMember -GroupId $group.id
-                $exportList += [PSCustomObject][Ordered]@{
-                    AccessPackage   = $accessPackage.DisplayName
-                    AccessPackageID = $accessPackage.Id
-                    Displayname     = $group.DisplayName
-                    Description     = $group.Description
-                    ScopeType       = "EntraGroup"  
-                    GroupID         = $group.id
-                    CatalogName     = $catalogName
-                    NumberOfMembers = $mems.Count    
-                }
-
-            }
-            catch {
-                #If get group command errors, check for enterprise app
-                Write-Host "No Group found, trying Enterprise App"
-
-                try {
-                    #Get the service principal
-                    $app = Get-MgServicePrincipal -ServicePrincipalId $scope.OriginId -ErrorAction Stop #Forces terminating error to go to catch
-                    $exportList += [PSCustomObject][Ordered]@{
-                        AccessPackage   = $accessPackage.DisplayName
-                        AccessPackageID = $accessPackage.Id
-                        Displayname     = $app.DisplayName
-                        Description     = "Enterprise application"
-                        ScopeType       = "ServicePrincipal"
-                        CatalogName     = $catalogName
-                    }
-
-                }
-                catch {
-                    Write-Host "No Enterprise App found, checking App reg."
-                    #If enterprise app fails, check for app reg
-
+    
+        $catalogName = $accessPackage.Catalog.DisplayName
+    
+        # Check if ResourceRoleScopes.Scope exists and has items
+        if ($accessPackage.ResourceRoleScopes.Scope) {
+            foreach ($scope in $accessPackage.ResourceRoleScopes.Scope) {
+                if ($scope) {
                     try {
-                        $app = Get-MgApplicaiton -Applicationid $scope.OriginId #Forces terminating error to go to catch
+                        $group = Get-MgGroup -GroupId $scope.OriginId -ErrorAction Stop
+                        $mems = Get-MgGroupMember -GroupId $group.Id
+    
                         $exportList += [PSCustomObject][Ordered]@{
                             AccessPackage   = $accessPackage.DisplayName
                             AccessPackageID = $accessPackage.Id
-                            Displayname     = $app.DisplayName
-                            Description     = "App Registration"
-                            ScopeType       = "AppRegistration"
-                            CatalogName     = $catalogName 
+                            Displayname     = $group.DisplayName
+                            Description     = $group.Description
+                            ScopeType       = "EntraGroup"
+                            GroupID         = $group.Id
+                            CatalogName     = $catalogName
+                            NumberOfMembers = $mems.Count
                         }
                     }
                     catch {
-                        write-host "No Groups, or apps found"
+                        Write-Host "No Group found, trying Enterprise App"
+    
+                        try {
+                            $app = Get-MgServicePrincipal -ServicePrincipalId $scope.OriginId -ErrorAction Stop
+    
+                            $exportList += [PSCustomObject][Ordered]@{
+                                AccessPackage   = $accessPackage.DisplayName
+                                AccessPackageID = $accessPackage.Id
+                                Displayname     = $app.DisplayName
+                                Description     = "Enterprise application"
+                                ScopeType       = "ServicePrincipal"
+                                CatalogName     = $catalogName
+                            }
+                        }
+                        catch {
+                            Write-Host "No Enterprise App found, checking App reg."
+    
+                            try {
+                                $app = Get-MgApplication -ApplicationId $scope.OriginId
+    
+                                $exportList += [PSCustomObject][Ordered]@{
+                                    AccessPackage   = $accessPackage.DisplayName
+                                    AccessPackageID = $accessPackage.Id
+                                    Displayname     = $app.DisplayName
+                                    Description     = "App Registration"
+                                    ScopeType       = "AppRegistration"
+                                    CatalogName     = $catalogName
+                                }
+                            }
+                            catch {
+                                Write-Host "No Groups, or apps found"
+                            }
+                        }
                     }
-
-
                 }
             }
         }
+        else {
+            # If no scopes exist, add a placeholder object
+            $exportList += [PSCustomObject][Ordered]@{
+                AccessPackage   = $accessPackage.DisplayName
+                AccessPackageID = $accessPackage.Id
+                Displayname     = "No resources on access package"
+                Description     = "No resources on access package"
+                ScopeType       = "No resources on access package"
+                CatalogName     = $catalogName
+            }
+        }
     }
+
     return $exportList
 }
 
@@ -387,7 +396,14 @@ $accessReviewers = Get-AccessReviewGroups -AccessPackageIDs $accessPackageIDs
 $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
     $accessPackageID = $package.AccessPackageID
 
+    #If package has a group id
+    if ($package.Groupid) {
     $groupID = $package.GroupID
+    }
+    #If no group ID, set to this for clarity
+    else {
+        $groupID = "No group on this access package"
+    }
 
     $roles = $entraRoles | Where-Object { $_.GroupID -eq $groupID }
 
@@ -395,23 +411,23 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
 
     $assignments = $accesspackageassignments  | Where-Object { $_.AccessPackage -eq $package.accessPackage }
 
-    $assignments = if ($null -ne $assignments.AssignmentEmail) {
-        if ($assignments.AssignmentEmail -is [array]) {
-            $assignments.AssignmentEmail -join ", "
-        }
-        else {
-            $assignments.AssignmentEmail
-        }
-    }
-
-    $listOfUsersParsed = if ($null -ne $reviewer.ListOfUsers) {
-        if ($reviewer.ListOfUsers -is [System.Object[]]) {
-            "No members in group"
-        }
+    
+$assignmentsFormatted = ""
+if ($null -ne $assignments.AssignmentEmail) {
+    if ($assignments.AssignmentEmail -is [array]) {
+        $assignmentsFormatted = $assignments.AssignmentEmail -join ", "
     }
     else {
-        "No members in group"
+        $assignmentsFormatted = $assignments.AssignmentEmail
     }
+}
+
+
+   
+$listOfUsersParsed = "No members in group"
+if ($null -ne $reviewer.ListOfUsers -and $reviewer.ListOfUsers -isnot [System.Object[]]) {
+    $listOfUsersParsed = $reviewer.ListOfUsers
+}
 
     if ($roles.Count -eq 0) {
         [PSCustomObject]@{
@@ -431,7 +447,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
             ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
             ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
             AccessReviewerGroupUsers = $listOfUsersParsed
-            Assignments              = $assignments
+            Assignments              = $assignmentsFormatted
         }
     }
     else {
@@ -453,7 +469,7 @@ $combinedObjects = foreach ($package in $accesspackageResourceinfo) {
                 ReviewerGroupName        = ($reviewer.ReviewerGroupName -is [System.Object[]]) ? "No reviewers assigned" : $reviewer.ReviewerGroupName
                 ReviewerGroupId          = ($reviewer.ReviewerGroupId -is [System.Object[]]) ? "No reviewer assigned" : $reviewer.ReviewerGroupId
                 AccessReviewerGroupUsers = $listOfUsersParsed
-                Assignments              = $assignments
+                Assignments              = $assignmentsFormatted
             }
         }
     }
