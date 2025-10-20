@@ -87,7 +87,7 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   interval                = 1
   timezone                = "Europe/London"
   start_time              = "2025-10-02T07:00:00+01:00"
-  description             = "Run AccessPackage runbook every 2 weeks."
+  description             = "Run AccessPackage runbook daily."
 }
 
 resource "azurerm_automation_job_schedule" "automation_job_schedule_Access_Package" {
