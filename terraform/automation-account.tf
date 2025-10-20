@@ -84,10 +84,10 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"
-  interval                = 14
+  interval                = 1
   timezone                = "Europe/London"
   start_time              = "2025-10-02T07:00:00+01:00"
-  description             = "Run AccessPackage runbook every 2 weeks."
+  description             = "Run AccessPackage runbook daily."
 }
 
 resource "azurerm_automation_job_schedule" "automation_job_schedule_Access_Package" {
