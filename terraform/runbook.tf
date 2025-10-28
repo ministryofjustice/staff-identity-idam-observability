@@ -92,3 +92,22 @@ resource "azurerm_automation_runbook" "runbook_guest_del_devl" {
 
   tags = local.tags
 }
+
+data "local_file" "mfa_metrics" {
+  filename = "${path.module}/../scripts/ps/get-mfa-metrics.ps1"
+}
+
+resource "azurerm_automation_runbook" "runbook_mfa_metrics" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-mfa-metrics-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Retrieves MFA metrics."
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.mfa_metrics.content
+
+  tags = local.tags
+}
