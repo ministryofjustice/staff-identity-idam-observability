@@ -17,7 +17,6 @@ param (
 # --- Start variables
 $timeStamp = Get-Date -format o
 
-
 # --- Start Functions
 function Write-LogInfo($logEntry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logEntry)"
@@ -78,7 +77,6 @@ $AllMFA = Get-MgReportAuthenticationMethodUserRegistrationDetail -All
 # Trim to non-guests
 $users = $AllMFA | Where-Object UserType -EQ "member"
 
-
 # stats
 $total = $users.Count
 
@@ -102,7 +100,6 @@ $statsObject = [PSCustomObject]@{
         WindowsHelloCount         = $whfb.Count
         WindowsHelloMFAPercent    = [math]::Round($whfb.Count/$total*100,2)
     }
-
 $statsObject
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
@@ -148,7 +145,5 @@ $style = @"
     # Send the email
     Send-MgUserMail -UserId $mailSender -BodyParameter $params
 }
-
-
 
 Write-LogInfo("Script execution finished")
