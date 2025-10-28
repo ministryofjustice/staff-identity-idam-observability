@@ -58,3 +58,9 @@ variable "idam_email_recipient" {
   description = "Used as email recipient in scripts etc"
 
 }
+
+variable "idam_email_sender" {
+  type = string
+  description = "Used as email sender in scripts etc"
+
+}
