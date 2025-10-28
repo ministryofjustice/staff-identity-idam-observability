@@ -86,7 +86,7 @@ resource "azurerm_automation_schedule" "automation_schedule_Access_Package" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-10-28T07:00:00+01:00"
+  start_time              = "2025-10-29T07:00:00+01:00"
   description             = "Run AccessPackage runbook daily."
 }
 
