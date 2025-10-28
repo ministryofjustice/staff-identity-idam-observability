@@ -35,13 +35,6 @@ on:
       github_access_token:
         description: 'Github Token'
         required: true
-    vars:
-      idam_email_sender:
-        description: 'Used as email sender in scripts etc'
-        required: true
-      idam_email_recipient:
-        description: 'Used as email recipient in scripts etc'
-        required: true
 
 permissions:
   pull-requests: write
