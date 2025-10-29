@@ -513,7 +513,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     stream_name = "Custom-${azapi_resource.workspaces_table_mfa_metrics.name}"
     column {
       name = "TimeGenerated"
-      type = "dateTime"
+      type = "datetime"
     }
     column {
       name = "TotalEnabledNonGuestUsers"
