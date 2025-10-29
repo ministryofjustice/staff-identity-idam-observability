@@ -44,9 +44,6 @@ function PostLogAnalyticsData()
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
 
-# Connect to Microsoft Graph with the required scopes
-Connect-MgGraph -Scopes "User.Read.All", "UserAuthenticationMethod.Read.All"
-
 # --- Start Script Execution
 Write-LogInfo("Script execution started")
 
