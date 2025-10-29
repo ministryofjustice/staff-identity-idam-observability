@@ -83,3 +83,14 @@ resource "azurerm_role_assignment" "assign_identity_dcr_guest_del_monitoring_pub
 #    allowed_resource_actions = ["microsoft.directory/applications/credentials/update"]
 #  }
 #}
+
+resource "azurerm_role_assignment" "assign_identity_dcr_mfa_metrics_monitoring_publisher" {
+  scope                = azurerm_monitor_data_collection_rule.data_collection_rule_mfa_metrics.id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+
+  depends_on = [
+    azurerm_user_assigned_identity.managed_identity,
+    azurerm_automation_account.automation_account,
+  ]
+}
