@@ -52,3 +52,13 @@ variable "state_storage_account_name" {
   default     = "stidamobservetfstate"
   description = "Storage account name for TF state file."
 }
+
+variable "idam_email_recipient" {
+  type        = string
+  description = "Used as email recipient in scripts etc"
+}
+
+variable "idam_email_sender" {
+  type        = string
+  description = "Used as email sender in scripts etc"
+}

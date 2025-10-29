@@ -72,7 +72,7 @@ resource "azurerm_role_assignment" "assign_identity_dcr_guest_del_monitoring_pub
 }
 
 ## Custom role not created in code as the pipeline does not have permissions
-## We didn't want to create elevated permissionss onthe pipeline for  just for this one item
+## We didn't want to create elevated permissions on the pipeline for  just for this one item
 #resource "azuread_custom_directory_role" "assign_identity_automation_account_application_update" {
 #  display_name = "Application Credentials Updater"
 #  description  = "Used to allow the IdAM Managed Identity to update app registration credentials."

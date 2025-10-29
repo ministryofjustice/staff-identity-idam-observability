@@ -69,6 +69,8 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
           TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
+          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
+          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         working-directory: ./terraform
 
       - name: Terraform Plan
@@ -80,6 +82,8 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
           TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
+          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
+          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         run: |
           terraform plan -lock-timeout=300s -input=false
         working-directory: ./terraform
@@ -93,6 +97,8 @@ jobs:
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
           TF_VAR_client_secret: ${{ secrets.workspace_client_secret }}
+          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
+          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         run: |
           terraform apply -lock-timeout=300s -input=false -auto-approve -parallelism=30 
         working-directory: ./terraform

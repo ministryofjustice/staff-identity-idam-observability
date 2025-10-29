@@ -387,3 +387,73 @@ resource "azapi_resource" "workspaces_table_guest_del_script" {
     azurerm_log_analytics_workspace.log_analytics_workspace
   ]
 }
+
+resource "azapi_resource" "workspaces_table_mfa_metrics" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_mfa_metrics_logs_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_mfa_metrics_logs_CL",
+        columns = [
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          },
+          {
+            name = "TotalEnabledNonGuestUsers",
+            type = "int"
+          },
+          {
+            name = "MFAenrolled",
+            type = "int"
+          },
+          {
+            name = "MFAenrolledPercent",
+            type = "int"
+          },
+          {
+            name = "PhoneCount",
+            type = "int"
+          },
+          {
+            name = "PhoneMFAPercent",
+            type = "int"
+          },
+          {
+            name = "AuthenticatorCount",
+            type = "int"
+          },
+          {
+            name = "AuthenticatorMFAPercent",
+            type = "int"
+          },
+          {
+            name = "HardwareCount",
+            type = "int"
+          },
+          {
+            name = "HardwareMFAPercent",
+            type = "int"
+          },
+          {
+            name = "WindowsHelloCount",
+            type = "int"
+          },
+          {
+            name = "WindowsHelloMFAPercent",
+            type = "int"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
