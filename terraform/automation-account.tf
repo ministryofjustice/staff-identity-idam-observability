@@ -138,7 +138,7 @@ resource "azurerm_automation_schedule" "automation_schedule_mfa_metrics" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2025-10-29T07:00:00+01:00"
+  start_time              = "2025-10-30T07:00:00+01:00"
   description             = "Run MFA metrics every day."
 }
 
