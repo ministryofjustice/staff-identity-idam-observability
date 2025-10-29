@@ -1,6 +1,7 @@
 name: "[Workflow] Path To Live"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
