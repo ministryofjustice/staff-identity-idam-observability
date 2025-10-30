@@ -413,7 +413,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           },
           {
             name = "MFAenrolledPercent",
-            type = "int"
+            type = "real"
           },
           {
             name = "PhoneCount",
@@ -421,7 +421,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           },
           {
             name = "PhoneMFAPercent",
-            type = "int"
+            type = "real"
           },
           {
             name = "AuthenticatorCount",
@@ -429,7 +429,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           },
           {
             name = "AuthenticatorMFAPercent",
-            type = "int"
+            type = "real"
           },
           {
             name = "HardwareCount",
@@ -437,7 +437,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           },
           {
             name = "HardwareMFAPercent",
-            type = "int"
+            type = "real"
           },
           {
             name = "WindowsHelloCount",
@@ -445,7 +445,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           },
           {
             name = "WindowsHelloMFAPercent",
-            type = "int"
+            type = "real"
           }
         ]
       }
