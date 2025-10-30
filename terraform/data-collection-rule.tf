@@ -525,7 +525,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     }
     column {
       name = "MFAenrolledPercent"
-      type = "int"
+      type = "real"
     }
     column {
       name = "PhoneCount"
@@ -533,7 +533,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     }
     column {
       name = "PhoneMFAPercent"
-      type = "int"
+      type = "real"
     }
     column {
       name = "AuthenticatorCount"
@@ -541,7 +541,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     }
     column {
       name = "AuthenticatorMFAPercent"
-      type = "int"
+      type = "real"
     }
     column {
       name = "HardwareCount"
@@ -549,7 +549,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     }
     column {
       name = "HardwareMFAPercent"
-      type = "int"
+      type = "real"
     }
     column {
       name = "WindowsHelloCount"
@@ -557,7 +557,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     }
     column {
       name = "WindowsHelloMFAPercent"
-      type = "int"
+      type = "real"
     }
   }
 
