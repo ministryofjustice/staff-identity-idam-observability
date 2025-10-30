@@ -55,8 +55,8 @@ function IsToBeDeleted($daysSinceCreated, $daysSinceLastLogin, $hasLoggedIn) {
         return $true
     }
 
-    # if user has not logged in for over 30 days
-    if ($daysSinceLastLogin -gt 30) {
+    # if user has not logged in for over 14 days
+    if ($daysSinceLastLogin -gt 14) {
         return $true
     }
 
