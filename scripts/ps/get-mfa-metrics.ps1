@@ -82,6 +82,20 @@ $authenticator = $users | Where-Object MethodsRegistered -Like *Authenticator* |
 $phone = $users | Where-Object MethodsRegistered -Like *phone* | Measure-Object
 $hardware = $users | Where-Object MethodsRegistered -Like *hardwareOneTimePasscode* | Measure-Object
 $whfb = $users | Where-Object MethodsRegistered -Like *windowsHelloForBusiness* | Measure-Object
+# Count methods registered per user
+$0 = 0
+$1 = 0
+$2 = 0
+$3 = 0
+$4plus = 0
+foreach ($user in $users) {
+    $count = $user.MethodsRegistered.Count
+    if ($count -eq "0") {$0++}
+    elseif ($count -eq "1") {$1++}
+    elseif ($count -eq "2") {$2++}
+    elseif ($count -eq "3") {$3++ }
+    elseif ($count -ge "4") {$4plus++}
+}
 
 $statsObject = [PSCustomObject]@{
         TimeGenerated             = $timeStamp
@@ -96,6 +110,11 @@ $statsObject = [PSCustomObject]@{
         HardwareMFAPercent        = [math]::Round($hardware.Count/$total*100,2)
         WindowsHelloCount         = $whfb.Count
         WindowsHelloMFAPercent    = [math]::Round($whfb.Count/$total*100,2)
+        ZeroMethodsRegistered     = $0
+        OneMethodRegistered       = $1
+        TwoMethodsRegistered      = $2
+        ThreeMethodsRegistered    = $3
+        FourPlusMethodsRegistered = $4plus
     }
 $statsObject
 
