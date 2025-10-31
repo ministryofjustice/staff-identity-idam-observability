@@ -559,6 +559,26 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
       name = "WindowsHelloMFAPercent"
       type = "real"
     }
+    column {
+      name = "ZeroMethodsRegistered"
+      type = "int"
+    }
+    column {
+      name = "OneMethodRegistered"
+      type = "int"
+    }
+    column {
+      name = "TwoMethodsRegistered"
+      type = "int"
+    }
+    column {
+      name = "ThreeMethodsRegistered"
+      type = "int"
+    }
+    column {
+      name = "FourPlusMethodsRegistered"
+      type = "int"
+    }
   }
 
   description = "Data collection rule for MFA metrics"
