@@ -446,6 +446,26 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
           {
             name = "WindowsHelloMFAPercent",
             type = "real"
+          },
+          {
+            name = "ZeroMethodsRegistered",
+            type = "int"
+          },
+          {
+            name = "OneMethodRegistered",
+            type = "int"
+          },
+          {
+            name = "TwoMethodsRegistered",
+            type = "int"
+          },
+          {
+            name = "ThreeMethodsRegistered",
+            type = "int"
+          },
+          {
+            name = "FourPlusMethodsRegistered",
+            type = "int"
           }
         ]
       }
