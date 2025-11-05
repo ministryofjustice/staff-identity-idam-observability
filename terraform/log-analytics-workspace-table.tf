@@ -484,5 +484,5 @@ resource "azurerm_log_analytics_workspace_table" "mfa_metrics" {
   retention_in_days       = 365
   total_retention_in_days = 365
 
-  depends_on = [ azapi_resource.workspaces_table_mfa_metrics ]
+  depends_on = [azapi_resource.workspaces_table_mfa_metrics]
 }
