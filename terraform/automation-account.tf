@@ -49,7 +49,7 @@ resource "azurerm_automation_schedule" "automation_schedule_creds_cleanup" {
   frequency               = "Day"
   interval                = 14
   timezone                = "Europe/London"
-  start_time              = "2025-09-16T07:00:00+01:00"
+  start_time              = "2025-11-17T07:00:00+01:00"
   description             = "Run cleanup every 2 weeks."
 }
 
