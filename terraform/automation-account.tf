@@ -42,8 +42,8 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule" {
   }
 }
 
-resource "azurerm_automation_schedule" "automation_schedule_cleanup" {
-  name                    = "as-${var.department}-${var.team}-${var.project}-cleanup"
+resource "azurerm_automation_schedule" "automation_schedule_creds_cleanup" {
+  name                    = "as-${var.department}-${var.team}-${var.project}-creds-cleanup"
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"
@@ -51,6 +51,23 @@ resource "azurerm_automation_schedule" "automation_schedule_cleanup" {
   timezone                = "Europe/London"
   start_time              = "2025-09-16T07:00:00+01:00"
   description             = "Run cleanup every 2 weeks."
+}
+
+resource "azurerm_automation_job_schedule" "automation_job_schedule_creds_cleanup" {
+  count = var.workspace_name == "DEVL" || var.workspace_name == "NLE" || var.workspace_name == "LIVE" ? 1 : 0
+
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  runbook_name            = azurerm_automation_runbook.runbook_creds_cleanup_script.name
+  schedule_name           = azurerm_automation_schedule.automation_schedule_creds_cleanup.name
+  parameters = {
+    miclientid     = azurerm_user_assigned_identity.managed_identity.client_id,
+    dcrimmutableid = azurerm_monitor_data_collection_rule.data_collection_rule_cleanup.immutable_id,
+    dceuri         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
+    logtablename   = azapi_resource.workspaces_table_creds_cleanup_script.name
+    mailsender     = var.idam_email_sender
+    mailrecipient  = var.idam_email_recipient
+  }
 }
 
 resource "azurerm_automation_schedule" "automation_schedule_guest_users" {
