@@ -143,9 +143,9 @@ function GenerateCredentials() {
 
 function RemoveExpiredCredentials {
 
-$ExpiredCredsTrimmed = $ExpiredCreds | Sort-Object daystoexpiration | Select-Object -First 15
+$ExpiredCredsSorted = $ExpiredCreds | Sort-Object daystoexpiration
 
-    $clean = foreach ($ExpiredCred in $ExpiredCredsTrimmed){
+    $clean = foreach ($ExpiredCred in $ExpiredCredsSorted){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
             $ErrorActionPreference = "stop"
             try {
