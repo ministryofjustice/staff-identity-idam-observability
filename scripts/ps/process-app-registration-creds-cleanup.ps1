@@ -10,7 +10,8 @@ param (
     [string]$DcrImmutableId,
     [string]$DceUri,
     [string]$LogTableName,
-    [string]$mailSender
+    [string]$mailSender,
+    [string]$mailRecipient
 )
 
 # --- Start variables
@@ -243,7 +244,7 @@ $params = @{
 		toRecipients = @(
 			@{
 				emailAddress = @{
-					address = "idamteam@justice.gov.uk"
+					address = "$mailRecipient"
 				}
 			}
 		)
