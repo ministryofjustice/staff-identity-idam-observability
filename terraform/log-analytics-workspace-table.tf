@@ -521,6 +521,10 @@ resource "azapi_resource" "workspaces_table_user_metrics" {
           {
             name = "TotalDisabledAccounts",
             type = "int"
+          },
+          {
+            name = "NotUsedForAYear",
+            type = "int"
           }
         ]
       }

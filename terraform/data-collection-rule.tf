@@ -633,7 +633,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_user_metri
     }
     column {
       name = "TotalGuests"
-      type = "real"
+      type = "int"
     }
     column {
       name = "TotalEnabledAccounts"
@@ -641,7 +641,11 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_user_metri
     }
     column {
       name = "TotalDisabledAccounts"
-      type = "real"
+      type = "int"
+    }
+    column {
+      name = "NotUsedForAYear"
+      type = "int"
     }
   }
 
