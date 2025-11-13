@@ -486,3 +486,58 @@ resource "azurerm_log_analytics_workspace_table" "mfa_metrics" {
 
   depends_on = [azapi_resource.workspaces_table_mfa_metrics]
 }
+
+resource "azapi_resource" "workspaces_table_user_metrics" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_user_metrics_logs_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_user_metrics_logs_CL",
+        columns = [
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          },
+          {
+            name = "TotalAccounts",
+            type = "int"
+          },
+          {
+            name = "TotalServiceAccounts",
+            type = "int"
+          },
+          {
+            name = "TotalGuests",
+            type = "int"
+          },
+          {
+            name = "TotalEnabledAccounts",
+            type = "int"
+          },
+          {
+            name = "TotalDisabledAccounts",
+            type = "int"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
+
+resource "azurerm_log_analytics_workspace_table" "user_metrics" {
+  workspace_id            = azurerm_log_analytics_workspace.log_analytics_workspace.id
+  name                    = azapi_resource.workspaces_table_user_metrics.name
+  retention_in_days       = 365
+  total_retention_in_days = 365
+
+  depends_on = [azapi_resource.workspaces_table_user_metrics]
+}
