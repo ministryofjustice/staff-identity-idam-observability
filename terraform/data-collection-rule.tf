@@ -589,3 +589,71 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
 
   tags = local.tags
 }
+
+resource "azurerm_monitor_data_collection_rule" "data_collection_rule_user_metrics" {
+  name                        = "dcr-${var.department}-${var.team}-${var.project}-user_metrics"
+  location                    = var.location
+  resource_group_name         = local.rg_name
+  data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.id
+
+  destinations {
+    log_analytics {
+      workspace_resource_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+      name                  = azurerm_log_analytics_workspace.log_analytics_workspace.name
+    }
+  }
+
+  data_flow {
+    streams       = ["Custom-${azapi_resource.workspaces_table_user_metrics.name}"]
+    destinations  = [azurerm_log_analytics_workspace.log_analytics_workspace.name]
+    transform_kql = "source"
+    output_stream = "Custom-${azapi_resource.workspaces_table_user_metrics.name}"
+  }
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [
+      azurerm_user_assigned_identity.managed_identity.id
+    ]
+  }
+
+  stream_declaration {
+    stream_name = "Custom-${azapi_resource.workspaces_table_user_metrics.name}"
+    column {
+      name = "TimeGenerated"
+      type = "datetime"
+    }
+    column {
+      name = "TotalAccounts"
+      type = "int"
+    }
+    column {
+      name = "TotalServiceAccounts"
+      type = "int"
+    }
+    column {
+      name = "TotalGuests"
+      type = "int"
+    }
+    column {
+      name = "TotalEnabledAccounts"
+      type = "int"
+    }
+    column {
+      name = "TotalDisabledAccounts"
+      type = "int"
+    }
+    column {
+      name = "NotUsedForAYear"
+      type = "int"
+    }
+  }
+
+  description = "Data collection rule for user metrics"
+  depends_on = [
+    azapi_resource.workspaces_table_user_metrics,
+    azurerm_monitor_data_collection_endpoint.data_collection_endpoint
+  ]
+
+  tags = local.tags
+}
