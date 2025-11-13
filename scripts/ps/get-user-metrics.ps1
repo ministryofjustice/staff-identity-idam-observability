@@ -16,6 +16,7 @@ param (
 
 # --- Start variables
 $timeStamp = Get-Date -format o
+$yearAgo = (Get-Date).AddYears(-1)
 
 # --- Start Functions
 function Write-LogInfo($logEntry) {
@@ -69,15 +70,22 @@ catch
   throw "$($_.Exception)"
 }
 
-$usersList = Get-EntraUser -All -Property UserPrincipalName, AccountEnabled, Id, UserType | Select-Object UserPrincipalName, AccountEnabled, Id, UserType
+$usersList = Get-EntraUser -All -Property UserPrincipalName,AccountEnabled,Id,UserType,OnPremisesSyncEnabled,CreatedDateTime,SignInActivity | Select-Object `
+    UserPrincipalName,AccountEnabled,Id,UserType,OnPremisesSyncEnabled,CreatedDateTime,`
+    @{Name='LastSignInDateTime';Expression={$_.SignInActivity.LastSignInDateTime}},`
+    @{Name='LastNonInteractiveSignInDateTime';Expression={$_.SignInActivity.LastNonInteractiveSignInDateTime}},`
+    @{Name='LastSuccessfulSignInDateTime';Expression={$_.SignInActivity.LastSuccessfulSignInDateTime}}
+
 $disabledUsers = $usersList | Where-Object { $_.accountEnabled -eq $false }
 $guestUsers = $usersList | Where-Object { $_.userType -eq 'Guest' }
 $serviceAccountUsers = $usersList | Where-Object { $_.userPrincipalName -like "svc_*" }
+$staleAccounts = $usersList | Where-Object {($_.LastSuccessfulSignInDateTime -le $yearAgo) -and (($_.CreatedDateTime -le $yearAgo))}
 
 $serviceAccounts = $serviceAccountUsers.Count
 $guestAccounts = $guestUsers.Count
 $enabledAccounts = ($usersList.Count - $disabledUsers.Count)
 $disabledAccounts = $disabledUsers.Count
+$staleAccounts = $staleAccounts.Count
 
 $statsObject = [PSCustomObject]@{
     TimeGenerated         = $timeStamp
@@ -86,6 +94,7 @@ $statsObject = [PSCustomObject]@{
     TotalGuests           = $guestAccounts
     TotalEnabledAccounts  = $enabledAccounts
     TotalDisabledAccounts = $disabledAccounts
+    NotUsedForAYear       = $staleAccounts
 }
 
 $statsObject
