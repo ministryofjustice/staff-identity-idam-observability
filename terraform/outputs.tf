@@ -32,10 +32,6 @@ output "dcr_immutable_guest_users_id" {
   value = azurerm_monitor_data_collection_rule.data_collection_rule_guest_users.immutable_id
 }
 
-output "dcr_immutable_guest_del_id" {
-  value = azurerm_monitor_data_collection_rule.data_collection_rule_guest_del.immutable_id
-}
-
 # Log Table Names
 
 output "log_table_workspaces_table" {
@@ -53,8 +49,3 @@ output "log_table_workspaces_table_creds_cleanup_script" {
 output "log_table_workspaces_table_guest_users" {
   value = azapi_resource.workspaces_table_guest_users.name
 }
-
-output "log_table_workspaces_table_guest_del_script" {
-  value = azapi_resource.workspaces_table_guest_del_script.name
-}
-
