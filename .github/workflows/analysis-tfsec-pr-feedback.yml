@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: tfsec with pr comments
         uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
         with:
