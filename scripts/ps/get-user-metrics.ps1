@@ -16,7 +16,7 @@ param (
 
 # --- Start variables
 $timeStamp = Get-Date -format o
-$yearAgo = (Get-Date).AddYears(-1)
+$thresholdDate = (Get-Date).AddYears(-1)
 
 # --- Start Functions
 function Write-LogInfo($logEntry) {
@@ -70,31 +70,37 @@ catch
   throw "$($_.Exception)"
 }
 
-$usersList = Get-EntraUser -All -Property UserPrincipalName,AccountEnabled,Id,UserType,OnPremisesSyncEnabled,CreatedDateTime,SignInActivity | Select-Object `
-    UserPrincipalName,AccountEnabled,Id,UserType,OnPremisesSyncEnabled,CreatedDateTime,`
-    @{Name='LastSignInDateTime';Expression={$_.SignInActivity.LastSignInDateTime}},`
-    @{Name='LastNonInteractiveSignInDateTime';Expression={$_.SignInActivity.LastNonInteractiveSignInDateTime}},`
-    @{Name='LastSuccessfulSignInDateTime';Expression={$_.SignInActivity.LastSuccessfulSignInDateTime}}
+## Below runs each query as a filter. This is because Get-MgUser -All uses too much memory for the runbook to handle
+# All user objects
+Get-MgUser -ConsistencyLevel eventual -CountVariable allCount -Top 1 | Out-Null
+# Service
+Get-MgUser -Filter "startsWith(UserPrincipalName, 'svc_')" -ConsistencyLevel eventual -CountVariable serviceCount -Top 1 | Out-Null
+# Guest
+Get-MgUser -Filter "UserType eq 'guest'" -ConsistencyLevel eventual -CountVariable guestCount -Top 1 | Out-Null
+# Enabled
+Get-MgUser -Filter "accountEnabled eq true" -ConsistencyLevel eventual -CountVariable enabledCount -Top 1 | Out-Null
+# Disabled
+Get-MgUser -Filter "accountEnabled eq false" -ConsistencyLevel eventual -CountVariable disabledCount -Top 1 | Out-Null
+# Stale accounts. Get-MgUser cannot filter on SignInActivity, so need to get users and increase counter
+$inactiveCount = 0
 
-$disabledUsers = $usersList | Where-Object { $_.accountEnabled -eq $false }
-$guestUsers = $usersList | Where-Object { $_.userType -eq 'Guest' }
-$serviceAccountUsers = $usersList | Where-Object { $_.userPrincipalName -like "svc_*" }
-$staleAccounts = $usersList | Where-Object {($_.LastSuccessfulSignInDateTime -le $yearAgo) -and (($_.CreatedDateTime -le $yearAgo))}
+# Stream users with signInActivity
+Get-MgUser -All -Property "id,userPrincipalName,signInActivity" | ForEach-Object {
+    $lastSuccessful = $_.SignInActivity.LastSuccessfulSignInDateTime
 
-$serviceAccounts = $serviceAccountUsers.Count
-$guestAccounts = $guestUsers.Count
-$enabledAccounts = ($usersList.Count - $disabledUsers.Count)
-$disabledAccounts = $disabledUsers.Count
-$staleAccounts = $staleAccounts.Count
+    if (-not $lastSuccessful -or [datetime]$lastSuccessful -lt $thresholdDate) {
+        $inactiveCount++
+    }
+}
 
 $statsObject = [PSCustomObject]@{
     TimeGenerated         = $timeStamp
-    TotalAccounts         = $usersList.Count
-    TotalServiceAccounts  = $serviceAccounts
-    TotalGuests           = $guestAccounts
-    TotalEnabledAccounts  = $enabledAccounts
-    TotalDisabledAccounts = $disabledAccounts
-    NotUsedForAYear       = $staleAccounts
+    TotalAccounts         = $allCount
+    TotalServiceAccounts  = $serviceCount
+    TotalGuests           = $guestCount
+    TotalEnabledAccounts  = $enabledCount
+    TotalDisabledAccounts = $disabledCount
+    NotUsedForAYear       = $inactiveCount
 }
 
 $statsObject
