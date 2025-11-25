@@ -85,11 +85,16 @@ Get-MgUser -Filter "accountEnabled eq false" -ConsistencyLevel eventual -CountVa
 $inactiveCount = 0
 
 # Stream users with signInActivity
-Get-MgUser -All -Property "id,userPrincipalName,signInActivity" | ForEach-Object {
+Get-MgUser -All -Property "id,userPrincipalName,createdDateTime,signInActivity" | ForEach-Object {
+    $created = [datetime]$_.CreatedDateTime
     $lastSuccessful = $_.SignInActivity.LastSuccessfulSignInDateTime
 
-    if (-not $lastSuccessful -or [datetime]$lastSuccessful -lt $thresholdDate) {
-        $inactiveCount++
+    # Only consider users created before the same threshold
+    if ($created -lt $thresholdDate) {
+        # Check if never signed in OR last successful sign-in older than 1 year
+        if (-not $lastSuccessful -or [datetime]$lastSuccessful -lt $thresholdDate) {
+            $inactiveCount++
+        }
     }
 }
 
