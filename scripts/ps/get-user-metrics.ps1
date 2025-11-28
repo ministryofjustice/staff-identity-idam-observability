@@ -98,6 +98,46 @@ Get-MgUser -All -Property "id,userPrincipalName,createdDateTime,signInActivity" 
     }
 }
 
+Write-LogInfo("Getting privileged user count")
+
+$activeAssignments   = Get-MgRoleManagementDirectoryRoleAssignment -All:$true
+$eligibleAssignments = Get-MgRoleManagementDirectoryRoleEligibilityScheduleInstance -All:$true
+$allAssignments      = $activeAssignments + $eligibleAssignments
+
+# Prepare hashset for unique user IDs
+$uniqueUsers = [System.Collections.Generic.HashSet[string]]::new()
+
+foreach ($assignment in $allAssignments) {
+    $principalId = $assignment.PrincipalId
+
+    # Try user
+    $user = Get-MgUser -UserId $principalId -ErrorAction SilentlyContinue
+    if ($user) {
+        Write-Output "Found USER - $($user.DisplayName)"
+        $uniqueUsers.Add($user.Id) | Out-Null
+        continue
+    }
+
+    # Try group
+    $group = Get-MgGroup -GroupId $principalId -ErrorAction SilentlyContinue
+    if ($group) {
+        Write-Output "Found GROUP - $($group.DisplayName)"
+        # Expand group members
+        $members = Get-MgGroupMember -GroupId $group.Id -All:$true
+        Write-Output "Found $($members.Count) members"
+        foreach ($member in $members) {
+            if ($member.AdditionalProperties['@odata.type'] -eq '#microsoft.graph.user') {
+                $uniqueUsers.Add($member.Id) | Out-Null
+            }
+        }
+        continue
+    }
+
+    # Ignore service principals (no users)
+}
+
+Write-LogInfo("Total unique users with active or eligible roles (direct or via group): $($uniqueUsers.Count)")
+
 $statsObject = [PSCustomObject]@{
     TimeGenerated         = $timeStamp
     TotalAccounts         = $allCount
@@ -106,6 +146,7 @@ $statsObject = [PSCustomObject]@{
     TotalEnabledAccounts  = $enabledCount
     TotalDisabledAccounts = $disabledCount
     NotUsedForAYear       = $inactiveCount
+    PrivilegedCount       = $uniqueUsers.Count
 }
 
 $statsObject

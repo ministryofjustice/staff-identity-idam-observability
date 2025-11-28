@@ -555,6 +555,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_user_metri
       name = "NotUsedForAYear"
       type = "int"
     }
+    column {
+      name = "PrivilegedCount"
+      type = "int"
+    }
   }
 
   description = "Data collection rule for user metrics"

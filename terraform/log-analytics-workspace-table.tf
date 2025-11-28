@@ -451,6 +451,10 @@ resource "azapi_resource" "workspaces_table_user_metrics" {
           {
             name = "NotUsedForAYear",
             type = "int"
+          },
+          {
+            name = "PrivilegedCount",
+            type = "int"
           }
         ]
       }
