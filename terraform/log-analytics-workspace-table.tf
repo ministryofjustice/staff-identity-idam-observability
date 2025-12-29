@@ -475,3 +475,41 @@ resource "azurerm_log_analytics_workspace_table" "user_metrics" {
 
   depends_on = [azapi_resource.workspaces_table_user_metrics]
 }
+
+resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_T1Roles_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_AccessPackage_CL",
+        columns = [
+          {
+            name = "Name",
+            type = "string"
+          },
+          {
+            name = "Type",
+            type = "string"
+          },
+          {
+            name = "RoleName",
+            type = "string"
+          },
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
