@@ -127,6 +127,6 @@ resource "azurerm_automation_runbook" "runbook_guest_users_script" {
   tags = local.tags
 }
 
-data "local_file" "mfa_metrics" {
+data "local_file" "T1Roles" {
   filename = "${path.module}/../scripts/ps/Get-Tier1PermAssignedRoles"
 }
