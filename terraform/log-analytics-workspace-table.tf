@@ -485,7 +485,7 @@ resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
     properties = {
       plan = "Analytics",
       schema = {
-        name = "${var.department}_${var.team}_${var.project}_AccessPackage_CL",
+        name = "${var.department}_${var.team}_${var.project}_T1PermRoles_CL",
         columns = [
           {
             name = "Name",
