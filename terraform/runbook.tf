@@ -111,3 +111,22 @@ resource "azurerm_automation_runbook" "runbook_user_metrics" {
 
   tags = local.tags
 }
+
+resource "azurerm_automation_runbook" "runbook_guest_users_script" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-Get-T1-Perm-Roles-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Excracts users that have T1 roles permanently assigned to them"
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.app_registrations_guest_users_script.content
+
+  tags = local.tags
+}
+
+data "local_file" "mfa_metrics" {
+  filename = "${path.module}/../scripts/ps/Get-Tier1PermAssignedRoles"
+}
