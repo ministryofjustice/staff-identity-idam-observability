@@ -113,7 +113,7 @@ resource "azurerm_automation_runbook" "runbook_user_metrics" {
 }
 
 data "local_file" "T1Roles" {
-  filename = "${path.module}/../scripts/ps/Get-Tier1PermAssignedRoles"
+  filename = "${path.module}/../scripts/ps/Get-Tier1PermAssignedRoles.ps1"
 }
 
 resource "azurerm_automation_runbook" "runbook_T1_Permusers_script" {
