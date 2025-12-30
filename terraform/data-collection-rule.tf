@@ -583,10 +583,10 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_T1_Perm_ro
     }
   }
   data_flow {
-    streams       = ["Custom-${azapi_resource.workspaces_table_access_package_info.name}"]
+    streams       = ["Custom-${azapi_resource.workspaces_table_T1_Perm_roles.name}"]
     destinations  = [azurerm_log_analytics_workspace.log_analytics_workspace.name]
     transform_kql = "source"
-    output_stream = "Custom-${azapi_resource.workspaces_table_access_package_info.name}"
+    output_stream = "Custom-${azapi_resource.workspaces_table_T1_Perm_roles.name}"
   }
   identity {
     type = "UserAssigned"
