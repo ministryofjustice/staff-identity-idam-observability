@@ -601,7 +601,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_T1_Perm_ro
       type = "string"
     }
       column {
-      name = "Type"
+      name = "ObjectType"
       type = "string"
     }
     column {
