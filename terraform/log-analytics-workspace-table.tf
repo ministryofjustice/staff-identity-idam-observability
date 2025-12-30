@@ -513,3 +513,12 @@ resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
     azurerm_log_analytics_workspace.log_analytics_workspace
   ]
 }
+
+resource "azurerm_log_analytics_workspace_table" "T1_Perm_roles" {
+  workspace_id            = azurerm_log_analytics_workspace.log_analytics_workspace.id
+  name                    = azapi_resource.workspaces_T1_Perm_roles.name
+  retention_in_days       = 365
+  total_retention_in_days = 365
+
+  depends_on = [azapi_resource.workspaces_table_T1_Perm_roles]
+}
