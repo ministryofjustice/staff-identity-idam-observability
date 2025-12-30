@@ -492,7 +492,7 @@ resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
             type = "string"
           },
           {
-            name = "Type",
+            name = "ObjectType",
             type = "string"
           },
           {

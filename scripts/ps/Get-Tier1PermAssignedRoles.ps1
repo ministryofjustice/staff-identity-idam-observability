@@ -147,7 +147,7 @@ foreach ($assignment in $permAssignments) {
     # Send the results to the report
     $results += [PSCustomObject]@{
         Name     = $obj
-        Type     = $type
+        ObjectType     = $type
         # Choose the right property for your role object:
         # Many role def objects use DisplayName; adjust if yours uses 'Name'
         RoleName = $EntraRole.DisplayName
