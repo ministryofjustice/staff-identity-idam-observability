@@ -186,7 +186,7 @@ resource "azurerm_automation_schedule" "automation_schedule_T1_Perms" {
   interval                = 1
   timezone                = "Europe/London"
   start_time              = "2026-01-20T06:00:00+01:00"
-  description             = "Run user metrics every day."
+  description             = "Run T1 Perm roles every day."
 }
 
 resource "azurerm_automation_job_schedule" "automation_job_schedule_T1_Perms" {
