@@ -179,7 +179,7 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule_user_metrics
 }
 
 resource "azurerm_automation_schedule" "automation_schedule_T1_Perms" {
-  name                    = "as-${var.department}-${var.team}-${var.project}-user-metrics"
+  name                    = "as-${var.department}-${var.team}-${var.project}-T1-perm-Assignments"
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"
