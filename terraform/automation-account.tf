@@ -194,8 +194,8 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule_T1_Perms" {
 
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
-  runbook_name            = azurerm_automation_runbook.runbook_T1_Permusers_script
-  schedule_name           = azurerm_automation_schedule.automation_schedule_T1_Perms
+  runbook_name            = azurerm_automation_runbook.runbook_T1_Permusers_script.name
+  schedule_name           = azurerm_automation_schedule.automation_schedule_T1_Perms.name
   parameters = {
     miclientid     = azurerm_user_assigned_identity.managed_identity.client_id,
     dcrimmutableid = azurerm_monitor_data_collection_rule.data_collection_rule_user_metrics.immutable_id,
