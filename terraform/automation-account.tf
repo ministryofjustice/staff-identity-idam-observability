@@ -177,3 +177,31 @@ resource "azurerm_automation_job_schedule" "automation_job_schedule_user_metrics
     mailrecipient  = var.idam_email_recipient
   }
 }
+
+resource "azurerm_automation_schedule" "automation_schedule_T1_Perms" {
+  name                    = "as-${var.department}-${var.team}-${var.project}-user-metrics"
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  frequency               = "Day"
+  interval                = 1
+  timezone                = "Europe/London"
+  start_time              = "2026-01-20T06:00:00+01:00"
+  description             = "Run user metrics every day."
+}
+
+resource "azurerm_automation_job_schedule" "automation_job_schedule_T1_Perms" {
+  count = var.workspace_name == "DEVL" || var.workspace_name == "NLE" || var.workspace_name == "LIVE" ? 1 : 0
+
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  runbook_name            = azurerm_automation_runbook.runbook_T1_Permusers_script
+  schedule_name           = azurerm_automation_schedule.automation_schedule_T1_Perms
+  parameters = {
+    miclientid     = azurerm_user_assigned_identity.managed_identity.client_id,
+    dcrimmutableid = azurerm_monitor_data_collection_rule.data_collection_rule_user_metrics.immutable_id,
+    dceuri         = azurerm_monitor_data_collection_endpoint.data_collection_endpoint.logs_ingestion_endpoint,
+    logtablename   = azapi_resource.workspaces_table_user_metrics.name
+    mailsender     = var.idam_email_sender
+    mailrecipient  = var.idam_email_recipient
+  }
+}
