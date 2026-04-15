@@ -53,10 +53,10 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
       ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1e31de5234b9f8995739874a8ce0492dc87873e2 #v4
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 #v3
         with:
           terraform_wrapper: false
 
