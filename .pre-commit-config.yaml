@@ -5,6 +5,10 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
         exclude: '^\.idea/'
+ - repo: https://github.com/ministryofjustice/devsecops-hooks
+    rev: v1.6.0
+    hooks:
+    - id: baseline
 - repo: https://github.com/awslabs/git-secrets
     rev: master
     hooks:
