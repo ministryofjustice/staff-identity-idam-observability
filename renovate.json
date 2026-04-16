@@ -1,0 +1,216 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommend",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "automerge": false,
+  "enabledManagers": [
+    "terraform",
+    "github-actions",
+    "pre-commit"
+  ],
+  "terraform": {
+    "fileMatch": [
+      "\\.tf$"
+    ]
+  },
+  "prCreation": "immediate",
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "description": "Terraform providers - patch updates (3 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "provider"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "Terraform providers (patch)",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Terraform providers - minor updates (7 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "provider"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "Terraform providers (minor)",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Terraform providers - major updates (30 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "provider"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Terraform providers (major)",
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "description": "Terraform modules - patch updates (3 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "module"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "Terraform modules (patch)",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Terraform modules - minor updates (7 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "module"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "Terraform modules (minor)",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Terraform modules - major updates (30 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "module"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Terraform modules (major)",
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "description": "Terraform required_version - patch updates (3 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "required_version"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "Terraform version (patch)",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Terraform required_version - minor updates (7 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "required_version"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "Terraform version (minor)",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "Terraform required_version - major updates (30 day stabilisation)",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchDepTypes": [
+        "required_version"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Terraform version (major)",
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "description": "GitHub Actions - patch updates (3 day stabilisation)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "GitHub Actions (patch)",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "GitHub Actions - minor updates (7 day stabilisation)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "GitHub Actions (minor)",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "GitHub Actions - major updates (30 day stabilisation)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "GitHub Actions (major)",
+      "minimumReleaseAge": "30 days"
+    },
+    {
+      "description": "pre-commit hooks - patch updates (3 day stabilisation)",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "pre-commit hooks (patch)",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "pre-commit hooks - minor updates (7 day stabilisation)",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "groupName": "pre-commit hooks (minor)",
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "pre-commit hooks - major updates (30 day stabilisation)",
+      "matchManagers": [
+        "pre-commit"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "pre-commit hooks (major)",
+      "minimumReleaseAge": "30 days"
+    }
+  ]
+}
+
