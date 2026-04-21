@@ -108,7 +108,7 @@ $statsObject = [PSCustomObject]@{
     "EnterpriseAppsWithNoOwners" = $EnterpriseAppsWithNoOwners
     "EnterpriseAppsWithExpiredPasswords" = $EnterpriseAppsWithExpiredSecrets
     "EnterpriseAppsWithExpiredKeys" = $EnterpriseAppsWithExpiredKeys
-    "EnterpriseAppsWithExpiredCredentials(total)" = $EnterpriseAppsWithExpiredSecrets + $EnterpriseAppsWithExpiredKeys
+    "EnterpriseAppsWithExpiredCredentialsTotal" = $EnterpriseAppsWithExpiredSecrets + $EnterpriseAppsWithExpiredKeys
 }
 $statsObject
 
