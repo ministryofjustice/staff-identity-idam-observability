@@ -131,3 +131,21 @@ resource "azurerm_automation_runbook" "runbook_T1_Permusers_script" {
   tags = local.tags
 }
 
+data "local_file" "app_metrics" {
+  filename = "${path.module}/../scripts/ps/get-app-metrics.ps1"
+}
+
+resource "azurerm_automation_runbook" "runbook_app_metrics" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-app-metrics-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Retrieves app metrics."
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.app_metrics.content
+
+  tags = local.tags
+}
