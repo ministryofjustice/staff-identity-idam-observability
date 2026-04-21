@@ -94,7 +94,7 @@ $EnterpriseAppsWithExpiredKeys = ($EnterpriseApps.KeyCredentials | Where-Object 
 $EnterpriseAppsWithNoOwners = 0
 
 foreach ($EnterpriseApp in $EnterpriseApps) {
-    $owners = Get-MgApplicationOwner -ApplicationId $EnterpriseApp.Id
+    $owners = Get-MgServicePrincipalOwner -ServicePrincipalId $EnterpriseApp.Id
     if ($owners.Count -eq 0) {
         $EnterpriseAppsWithNoOwners = $EnterpriseAppsWithNoOwners + 1
     }
