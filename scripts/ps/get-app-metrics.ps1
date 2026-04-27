@@ -136,10 +136,10 @@ $style = @"
     # Create the parameter sets
     $params = @{
         message = @{
-            subject = "$($tenantName.DisplayName) - MFA stats failed to run"
+            subject = "$($tenantName.DisplayName) - App stats failed to run"
             body = @{
                 contentType = "Html"
-                content = "Dear IDAM Team,<br>Automation failed to run MFA metrics.<br>Please investigate in the $($tenantName.DisplayName) tenant.<br>Below are the stats from this run: $body"
+                content = "Dear IDAM Team,<br>Automation failed to run App metrics.<br>Please investigate in the $($tenantName.DisplayName) tenant.<br>Below are the stats from this run: $body"
             }
             toRecipients = @(
                 @{
