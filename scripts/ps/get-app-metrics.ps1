@@ -87,7 +87,7 @@ $appRegistrationsWithExpiredSecrets = $clientSecretApps.PasswordCredentials |Whe
 $appRegistrationsWithExpiredKeys = $clientCertApps.KeyCredentials |Where-Object { $_.EndDate -le $expirationThreshold } | Measure-Object
 
 # Service Principals / EnterpriseApps 
-$EnterpriseApps = Get-EntraServicePrincipal -All
+$EnterpriseApps = Get-EntraServicePrincipal -All:$true | ? {$_.Tags -eq "WindowsAzureActiveDirectoryIntegratedApp"}
 
 $EnterpriseAppsWithExpiredSecrets = ($EnterpriseApps.PasswordCredentials | Where-Object { $_.EndDateTime -le $expirationThreshold } | Measure-Object).count
 $EnterpriseAppsWithExpiredKeys = ($EnterpriseApps.KeyCredentials | Where-Object { $_.EndDateTime -le $expirationThreshold } | Measure-Object).count
