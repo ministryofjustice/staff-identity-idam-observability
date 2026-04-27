@@ -522,3 +522,70 @@ resource "azurerm_log_analytics_workspace_table" "T1_Perm_roles" {
 
   depends_on = [azapi_resource.workspaces_table_T1_Perm_roles]
 }
+
+resource "azapi_resource" "workspaces_table_app_metrics" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_app_metrics_logs_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_app_metrics_logs_CL",
+        columns = [
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          },
+          {
+            name = "TotalAppRegistrations",
+            type = "int"
+          },
+          {
+            name = "AppRegistrationsWithNoOwners",
+            type = "int"
+          },
+          {
+            name = "AppRegistrationsWithExpiredCredentials",
+            type = "int"
+          },
+          {
+            name = "TotalEnterpriseApps",
+            type = "int"
+          },
+          {
+            name = "EnterpriseAppsWithNoOwners",
+            type = "int"
+          },
+          {
+            name = "EnterpriseAppsWithExpiredPasswords",
+            type = "int"
+          },
+          {
+            name = "EnterpriseAppsWithExpiredKeys",
+            type = "int"
+          },
+          {
+            name = "EnterpriseAppsWithExpiredCredentialsTotal",
+            type = "int"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
+
+resource "azurerm_log_analytics_workspace_table" "app_metrics" {
+  workspace_id            = azurerm_log_analytics_workspace.log_analytics_workspace.id
+  name                    = azapi_resource.workspaces_table_app_metrics.name
+  retention_in_days       = 365
+  total_retention_in_days = 365
+
+  depends_on = [azapi_resource.workspaces_table_app_metrics]
+}
