@@ -64,11 +64,29 @@ function ApplicationOwnersAsCsv($applicationId) {
     return ($cleanedOwners -join "," -replace ('"', '') -replace ('UserPrincipalName,', ''))
 }
 
+function EntAppOwnersAsCsv($applicationId) {
+    $owners = Get-MgServicePrincipalOwnerAsUser -ServicePrincipalId $applicationId -Property UserPrincipalName | Select-Object UserPrincipalName
+
+    $cleanedOwners = foreach ($owner in $owners){
+        if ($owner.UserPrincipalName | Where-Object { $_ -notin $excludedUpns }) {
+            if ($owner.UserPrincipalName | Where-Object { -not $_.EndsWith("@JusticeUK.onmicrosoft.com") }) {
+                [PSCustomObject]@{
+                    UserPrincipalName         = $owner.UserPrincipalName
+                }
+            }
+        }
+    }
+
+    $cleanedOwners = $cleanedOwners | ConvertTo-Csv -NoTypeInformation    
+
+    return ($cleanedOwners -join "," -replace ('"', '') -replace ('UserPrincipalName,', ''))
+}
 
 function GenerateCredentials() {
 
     #Write-LogInfo("Fetch all Application Registrations")
 
+    # Retrieve AppRegs
     $applications = Get-MgApplication -All | Select-Object AppId, DisplayName, PasswordCredentials, KeyCredentials, Id, Owners | Sort-Object -Property DisplayName
     #Write-LogInfo("$(([PSObject[]]($applications)).Count) Applications Found.")
 
@@ -78,7 +96,7 @@ function GenerateCredentials() {
     $ClientSecretApps = $applications | Where-Object {$_.passwordCredentials}
     #Write-LogInfo("$(([PSObject[]]($ClientSecretApps)).Count) Applications with Secrets Found.")
 
-    # Retrieve certificates
+    # Retrieve AppReg certificates
     $CertApp = foreach ($App in $CertificateApps) {
         foreach ($Cert in $App.KeyCredentials) {
             $applicationOwners = ApplicationOwnersAsCsv($App.Id)
@@ -91,7 +109,7 @@ function GenerateCredentials() {
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
                 applicationid       = $App.AppId
-                credtype            = 'Certificate'
+                credtype            = 'AppReg - Certificate'
                 startdate           = $Cert.StartDateTime
                 enddate             = $Cert.EndDateTime
                 daystoexpiration    = $daysToExpiry
@@ -107,7 +125,7 @@ function GenerateCredentials() {
     # Store expired certs as a variable
     $ExpiredCerts = $CertApp | Where-Object {$_.status -EQ "Expired"}
 
-    # Retrieve secrets
+    # Retrieve AppReg secrets
     $SecretApp = foreach ($App in $ClientSecretApps){
         foreach ($Secret in $App.PasswordCredentials) {
             $applicationOwners = ApplicationOwnersAsCsv($App.Id)
@@ -120,7 +138,7 @@ function GenerateCredentials() {
             [PSCustomObject]@{
                 displayname         = $App.DisplayName
                 applicationid       = $App.AppId
-                credtype            = 'Secret'
+                credtype            = 'AppReg - Secret'
                 startdate           = $Secret.StartDateTime
                 enddate             = $Secret.EndDateTime
                 daystoexpiration    = $daysToExpiry
@@ -134,12 +152,75 @@ function GenerateCredentials() {
         }
     }
     # Store expired secrets as a variable
-    # Added logic to only count expired creds over 30 days, just as a precaution
-    $ExpiredSecrets = $SecretApp | Where-Object {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
+    $ExpiredSecrets = $SecretApp | Where-Object {$_.status -EQ "Expired"}
     
+    # Retrieve Service Principals / EnterpriseApps 
+    $EnterpriseApps = Get-EntraServicePrincipal -All:$true | ? {$_.Tags -eq "WindowsAzureActiveDirectoryIntegratedApp"}
+
+    $CertificateEntApps  = $EnterpriseApps | Where-Object {$_.keyCredentials}
+
+    $SecretEntApps = $EnterpriseApps | Where-Object {$_.passwordCredentials}
+
+    # Retrieve EntApp certificates
+    $EntAppCerts = foreach ($App in $CertificateEntApps) {
+        foreach ($Cert in $App.KeyCredentials) {
+            $applicationOwners = EntAppOwnersAsCsv($App.Id)
+
+            $daysToExpiry = (($Cert.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
+            $expiredState = "Valid"
+            if($daysToExpiry -lt 1) {
+                $expiredState = "Expired"
+            }
+            [PSCustomObject]@{
+                displayname         = $App.DisplayName
+                applicationid       = $App.AppId
+                credtype            = 'EntApp - Certificate'
+                startdate           = $Cert.StartDateTime
+                enddate             = $Cert.EndDateTime
+                daystoexpiration    = $daysToExpiry
+                objectid            = $App.Id
+                keyid               = $Cert.KeyId
+                description         = $Cert.DisplayName
+                TimeGenerated       = $timeStamp
+                status              = $expiredState
+                owners              = $applicationOwners
+            }
+        }
+    }
+    # Store expired certs as a variable
+    $EntAppExpiredCerts = $EntAppCerts | Where-Object {$_.status -EQ "Expired"}
+
+    # Retrieve EntApp secrets
+    $EntaAppSecrets = foreach ($App in $SecretEntApps){
+        foreach ($Secret in $App.PasswordCredentials) {
+            $applicationOwners = EntAppOwnersAsCsv($App.Id)
+
+            $daysToExpiry = (($Secret.EndDateTime) - (Get-Date) | Select-Object -ExpandProperty TotalDays) -as [int]
+            $expiredState = "Valid"
+            if($daysToExpiry -lt 1) {
+                $expiredState = "Expired"
+            }
+            [PSCustomObject]@{
+                displayname         = $App.DisplayName
+                applicationid       = $App.AppId
+                credtype            = 'EntApp - Secret'
+                startdate           = $Secret.StartDateTime
+                enddate             = $Secret.EndDateTime
+                daystoexpiration    = $daysToExpiry
+                objectid            = $App.Id
+                keyid               = $Secret.KeyId
+                description         = $Secret.DisplayName
+                TimeGenerated       = $timeStamp
+                status              = $expiredState
+                owners              = $applicationOwners
+            }
+        }
+    }
+    # Store expired secrets as a variable
+    $EntAppExpiredSecrets = $EntaAppSecrets | Where-Object {$_.status -EQ "Expired"}
+
     # Combine expired credentials
-    [array]$ExpiredCerts + $ExpiredSecrets
-    
+    [array]$ExpiredCerts + $ExpiredSecrets + $EntAppExpiredCerts + $EntAppExpiredSecrets
 }
 
 function RemoveExpiredCredentials {
@@ -148,32 +229,43 @@ $ExpiredCredsSorted = $ExpiredCreds | Sort-Object daystoexpiration
 
     $clean = foreach ($ExpiredCred in $ExpiredCredsSorted){
         write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
-            $ErrorActionPreference = "stop"
+        $ErrorActionPreference = "stop"
+        if ($ExpiredCred -like "AppReg*"){
             try {
                 Remove-AzADAppCredential -ApplicationId $ExpiredCred.applicationid -KeyId $ExpiredCred.keyid -ErrorAction stop
                 $removal = "Removed"
-                }
-                catch
-                {
+            }
+            catch
+            {
                 $removal = "$($_.Exception)"
-                }
+            }
+        }
+        if ($ExpiredCred -like "EntApp*"){
+            try {
+                Remove-AzSPAppCredential -ObjectId $ExpiredCred.objectid -KeyId $ExpiredCred.keyid -ErrorAction stop
+                $removal = "Removed"
+            }
+            catch
+            {
+                $removal = "$($_.Exception)"
+            }
+        }
 
-                           [PSCustomObject]@{
-                        displayname         = $ExpiredCred.displayname
-                        cleanup             = $removal
-                        applicationid       = $ExpiredCred.applicationid
-                        credtype            = $ExpiredCred.credtype
-                        startdate           = $ExpiredCred.startdate
-                        enddate             = $ExpiredCred.enddate
-                        daystoexpiration    = $ExpiredCred.daystoexpiration
-                        objectid            = $ExpiredCred.objectid
-                        keyid               = $ExpiredCred.keyid
-                        description         = $ExpiredCred.description
-                        TimeGenerated       = $ExpiredCred.TimeGenerated
-                        status              = $ExpiredCred.status
-                        owners              = $ExpiredCred.owners
-                    }
-                 
+                [PSCustomObject]@{
+            displayname         = $ExpiredCred.displayname
+            cleanup             = $removal
+            applicationid       = $ExpiredCred.applicationid
+            credtype            = $ExpiredCred.credtype
+            startdate           = $ExpiredCred.startdate
+            enddate             = $ExpiredCred.enddate
+            daystoexpiration    = $ExpiredCred.daystoexpiration
+            objectid            = $ExpiredCred.objectid
+            keyid               = $ExpiredCred.keyid
+            description         = $ExpiredCred.description
+            TimeGenerated       = $ExpiredCred.TimeGenerated
+            status              = $ExpiredCred.status
+            owners              = $ExpiredCred.owners
+        }   
     }
     $clean
 }
@@ -203,12 +295,10 @@ catch
   throw "$($_.Exception)"
 }
 
-
 $ExpiredCreds = GenerateCredentials
 $RemovedCreds = RemoveExpiredCredentials
 
-
-Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials Found (expired over 30 days).")
+Write-LogInfo("$(([PSObject[]]($RemovedCreds)).Count) Total Expired Credentials Found.")
 
 # Convert the list of each Certificates & secrets for each App Registration into JSON format so we can send it to Log Analytics
 Write-LogInfo("Convert Credentials list to JSON")
@@ -254,6 +344,5 @@ $params = @{
 
 # Send the email
 Send-MgUserMail -UserId $mailSender -BodyParameter $params
-
 
 Write-LogInfo("Script execution finished")
