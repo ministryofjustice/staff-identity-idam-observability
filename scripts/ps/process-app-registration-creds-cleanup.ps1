@@ -228,7 +228,7 @@ function RemoveExpiredCredentials {
 $ExpiredCredsSorted = $ExpiredCreds | Sort-Object daystoexpiration
 
     $clean = foreach ($ExpiredCred in $ExpiredCredsSorted){
-        write-host "Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid)."
+        Write-LogInfo("Will remove cred from $(($ExpiredCred).displayname), keyID $(($ExpiredCred).keyid).")
         $ErrorActionPreference = "stop"
         if ($ExpiredCred -like "AppReg*"){
             try {
