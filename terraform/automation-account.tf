@@ -47,10 +47,10 @@ resource "azurerm_automation_schedule" "automation_schedule_creds_cleanup" {
   resource_group_name     = local.rg_name
   automation_account_name = azurerm_automation_account.automation_account.name
   frequency               = "Day"
-  interval                = 14
+  interval                = 7
   timezone                = "Europe/London"
   start_time              = "2025-11-17T07:00:00+01:00"
-  description             = "Run cleanup every 2 weeks."
+  description             = "Run cleanup every week."
 }
 
 resource "azurerm_automation_job_schedule" "automation_job_schedule_creds_cleanup" {
