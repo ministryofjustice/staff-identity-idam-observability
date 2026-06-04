@@ -104,8 +104,8 @@ function GenerateCredentials() {
             }
         }
     }
-    # Store expired certs as a variable
-    $ExpiredCerts = $CertApp | Where-Object {$_.status -EQ "Expired"}
+    # Store expired certs as a variable, with a buffer of 2 days, just as a precaution
+    $ExpiredCerts = $CertApp | Where-Object {$_.status -EQ "Expired" -and $_.daystoexpiration -le -2}
 
     # Retrieve secrets
     $SecretApp = foreach ($App in $ClientSecretApps){
@@ -133,9 +133,8 @@ function GenerateCredentials() {
             }
         }
     }
-    # Store expired secrets as a variable
-    # Added logic to only count expired creds over 30 days, just as a precaution
-    $ExpiredSecrets = $SecretApp | Where-Object {$_.status -EQ "Expired" -and $_.daystoexpiration -le -30}
+    # Store expired secrets as a variable, with a buffer of 2 days, just as a precaution
+    $ExpiredSecrets = $SecretApp | Where-Object {$_.status -EQ "Expired" -and $_.daystoexpiration -le -2}
     
     # Combine expired credentials
     [array]$ExpiredCerts + $ExpiredSecrets
