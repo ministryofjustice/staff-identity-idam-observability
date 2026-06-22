@@ -40,7 +40,7 @@ jobs:
       arm_subscription_id: ${{ secrets.arm_subscription_id }}
       arm_tenant_id: ${{ secrets.arm_tenant_id }}
       arm_client_id: ${{ secrets.arm_client_id }}
-      arm_client_secret: ${{ secrets.arm_client_secret }}
+      ARM_USE_OIDC: true
       workspace_subscription_id: ${{ secrets.workspace_subscription_id }}
       workspace_tenant_id: ${{ secrets.workspace_tenant_id }}
       workspace_client_id: ${{ secrets.workspace_client_id }}
