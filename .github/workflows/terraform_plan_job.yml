@@ -67,7 +67,6 @@ jobs:
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
           TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
           TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         working-directory: ./terraform
@@ -80,7 +79,6 @@ jobs:
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
           TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
           TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         working-directory: ./terraform
@@ -93,7 +91,6 @@ jobs:
           TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
           TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
           TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
           TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
           TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         run: |
