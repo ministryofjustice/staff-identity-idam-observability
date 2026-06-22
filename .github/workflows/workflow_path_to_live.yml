@@ -65,5 +65,4 @@ jobs:
       workspace_subscription_id: ${{ secrets.workspace_subscription_id }}
       workspace_tenant_id: ${{ secrets.workspace_tenant_id }}
       workspace_client_id: ${{ secrets.workspace_client_id }}
-      workspace_client_secret: ${{ secrets.workspace_client_secret }}
       github_access_token: ${{ secrets.GITHUB_TOKEN }}
