@@ -14,6 +14,7 @@ terraform {
     storage_account_name = "stidamobservetfstate003"
     container_name       = "tfstate"
     key                  = "terraform.tfstate"
+    use_oidc = true
   }
 }
 
@@ -23,7 +24,7 @@ provider "azurerm" {
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
   client_id       = var.client_id
-  client_secret   = var.client_secret
+  use_oidc = true
 }
 
 #provider "azuread" {
@@ -36,7 +37,7 @@ provider "azapi" {
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
   client_id       = var.client_id
-  client_secret   = var.client_secret
+  use_oidc = true
 
   default_tags     = local.tags
   default_location = var.location

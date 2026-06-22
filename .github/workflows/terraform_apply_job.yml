@@ -11,9 +11,6 @@ on:
       arm_client_id:
         description: 'Azure ARM Client ID'
         required: true
-      arm_client_secret:
-        description: 'Azure ARM Client Secret'
-        required: true
       arm_tenant_id:
         description: 'ARM Tenant ID'
         required: true
@@ -22,9 +19,6 @@ on:
         required: true
       workspace_client_id:
         description: 'Azure ARM Client ID for TF Workspace'
-        required: true
-      workspace_client_secret:
-        description: 'Azure ARM Client Secret for TF Workspace'
         required: true
       workspace_tenant_id:
         description: 'ARM Tenant ID for TF Workspace'
