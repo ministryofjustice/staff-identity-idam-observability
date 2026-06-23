@@ -46,9 +46,16 @@ jobs:
       ARM_USE_OIDC: true
       ARM_SUBSCRIPTION_ID: ${{ secrets.arm_subscription_id }}
       ARM_TENANT_ID: ${{ secrets.arm_tenant_id }}
+      TF_WORKSPACE: ${{ inputs.workspace_name }}
+      TF_VAR_workspace_name: ${{ inputs.workspace_name }}
+      TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
+      TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
+      TF_VAR_client_id: ${{ secrets.workspace_client_id }}
+      TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
+      TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
+
     steps:
       - uses: actions/checkout@1e31de5234b9f8995739874a8ce0492dc87873e2 #v4
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 #v3
         with:
@@ -56,43 +63,16 @@ jobs:
         
       - name: Terraform Init
         run: terraform init -input=false
-        env:
-          TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_workspace_name: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
-          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
-          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         working-directory: ./terraform
 
       - name: Terraform Plan
         id: terraform_plan
-        env:
-          TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_workspace_name: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
-          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
-          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         run: |
           terraform plan -lock-timeout=300s -input=false
         working-directory: ./terraform
 
       - name: Terraform Apply
         id: terraform_apply
-        env:
-          TF_WORKSPACE: ${{ inputs.workspace_name }}
-          TF_VAR_workspace_name: ${{ inputs.workspace_name }}
-          TF_VAR_subscription_id: ${{ secrets.workspace_subscription_id }}
-          TF_VAR_tenant_id: ${{ secrets.workspace_tenant_id }}
-          TF_VAR_client_id: ${{ secrets.workspace_client_id }}
-          ARM_USE_OIDC: true
-          TF_VAR_idam_email_recipient: ${{ vars.idam_email_recipient }}
-          TF_VAR_idam_email_sender: ${{ vars.idam_email_sender }}
         run: |
           terraform apply -lock-timeout=300s -input=false -auto-approve -parallelism=30 
         working-directory: ./terraform
