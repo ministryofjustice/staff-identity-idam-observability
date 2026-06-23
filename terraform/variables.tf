@@ -18,11 +18,6 @@ variable "client_id" {
   description = "Client ID for authentication."
 }
 
-variable "client_secret" {
-  type        = string
-  description = "Client Secret for authentication."
-}
-
 variable "project" {
   type        = string
   default     = "observability"
