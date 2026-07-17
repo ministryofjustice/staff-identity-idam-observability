@@ -82,6 +82,8 @@ $authenticator = $users | Where-Object MethodsRegistered -Like *Authenticator* |
 $phone = $users | Where-Object MethodsRegistered -Like *phone* | Measure-Object
 $hardware = $users | Where-Object MethodsRegistered -Like *hardwareOneTimePasscode* | Measure-Object
 $whfb = $users | Where-Object MethodsRegistered -Like *windowsHelloForBusiness* | Measure-Object
+$anypasskey = $users | Where-Object MethodsRegistered -Like *passKeyDeviceBound* | Measure-Object
+
 # Count methods registered per user
 $0 = 0
 $1 = 0
@@ -110,6 +112,8 @@ $statsObject = [PSCustomObject]@{
         HardwareMFAPercent        = [math]::Round($hardware.Count/$total*100,2)
         WindowsHelloCount         = $whfb.Count
         WindowsHelloMFAPercent    = [math]::Round($whfb.Count/$total*100,2)
+        PasskeyCount              = $Anypasskey.Count
+        PasskeyPercent            = [math]::Round($anypasskey.Count/$total*100,2)
         ZeroMethodsRegistered     = $0
         OneMethodRegistered       = $1
         TwoMethodsRegistered      = $2
