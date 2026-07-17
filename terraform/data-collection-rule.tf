@@ -470,7 +470,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
     column {
      name = "PasskeyCount"
      type = "int"
-}
+    }
     column {
       name = "ZeroMethodsRegistered"
       type = "int"
