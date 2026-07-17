@@ -113,6 +113,7 @@ $statsObject = [PSCustomObject]@{
         WindowsHelloCount         = $whfb.Count
         WindowsHelloMFAPercent    = [math]::Round($whfb.Count/$total*100,2)
         PasskeyCount              = $Anypasskey.Count
+        PasskeyPercent            = [math]::Round($anypasskey.Count/$total*100,2)
         ZeroMethodsRegistered     = $0
         OneMethodRegistered       = $1
         TwoMethodsRegistered      = $2

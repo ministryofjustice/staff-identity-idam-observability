@@ -378,6 +378,10 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
             type = "int"
           },
           {
+            name = "PasskeyPercent",
+            type = "real"
+          },
+          {
             name = "ZeroMethodsRegistered",
             type = "int"
           },
