@@ -73,8 +73,9 @@ catch
 ## Below runs each query as a filter. This is because Get-MgUser -All uses too much memory for the runbook to handle
 # All user objects
 Get-MgUser -ConsistencyLevel eventual -CountVariable allCount -Top 1 | Out-Null
-# Service
-Get-MgUser -Filter "startsWith(UserPrincipalName, 'svc_')" -ConsistencyLevel eventual -CountVariable serviceCount -Top 1 | Out-Null
+# Service Accounts
+$groupId = "c0629516-5cb1-412a-becc-54e936b777df"
+$serviceCount = Get-MgGroupTransitiveMember -GroupId $groupId -All
 # Guest
 Get-MgUser -Filter "UserType eq 'guest'" -ConsistencyLevel eventual -CountVariable guestCount -Top 1 | Out-Null
 # Enabled
@@ -141,7 +142,7 @@ Write-LogInfo("Total unique users with active or eligible roles (direct or via g
 $statsObject = [PSCustomObject]@{
     TimeGenerated         = $timeStamp
     TotalAccounts         = $allCount
-    TotalServiceAccounts  = $serviceCount
+    TotalServiceAccounts  = $serviceCount.Count
     TotalGuests           = $guestCount
     TotalEnabledAccounts  = $enabledCount
     TotalDisabledAccounts = $disabledCount
