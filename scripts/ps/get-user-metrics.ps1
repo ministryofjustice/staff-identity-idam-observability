@@ -74,8 +74,8 @@ catch
 # All user objects
 Get-MgUser -ConsistencyLevel eventual -CountVariable allCount -Top 1 | Out-Null
 # Service Accounts
-$groupId = "c0629516-5cb1-412a-becc-54e936b777df"
-$serviceCount = Get-MgGroupTransitiveMember -GroupId $groupId -All
+$groupId = Get-MgGroup -Filter  "DisplayName eq 'Service Accounts'"
+$serviceCount = Get-MgGroupTransitiveMember -GroupId $groupId.Id -All
 # Guest
 Get-MgUser -Filter "UserType eq 'guest'" -ConsistencyLevel eventual -CountVariable guestCount -Top 1 | Out-Null
 # Enabled
