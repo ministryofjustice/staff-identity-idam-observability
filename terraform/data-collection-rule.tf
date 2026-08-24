@@ -468,12 +468,12 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_mfa_metric
       type = "real"
     }
     column {
-     name = "PasskeyCount"
-     type = "int"
+      name = "PasskeyCount"
+      type = "int"
     }
-   column {
-     name = "PasskeyPercent"
-     type = "real"
+    column {
+      name = "PasskeyPercent"
+      type = "real"
     }
     column {
       name = "ZeroMethodsRegistered"
