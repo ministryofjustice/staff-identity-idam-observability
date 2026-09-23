@@ -597,3 +597,66 @@ resource "azurerm_log_analytics_workspace_table" "app_metrics" {
 
   depends_on = [azapi_resource.workspaces_table_app_metrics]
 }
+
+resource "azapi_resource" "workspaces_table_fido2_metrics" {
+  type      = "Microsoft.OperationalInsights/workspaces/tables@2021-12-01-preview"
+  name      = "${var.department}_${var.team}_${var.project}_fido2_metrics_logs_CL"
+  parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
+
+  body = jsonencode({
+    properties = {
+      plan = "Analytics",
+      schema = {
+        name = "${var.department}_${var.team}_${var.project}_fido2_metrics_logs_CL",
+        columns = [
+          {
+            name = "TimeGenerated",
+            type = "dateTime"
+          },
+          {
+            name = "SecurityGroupDirectUserMembers",
+            type = "int"
+          },
+          {
+            name = "HardwareKeyUsers",
+            type = "int"
+          },
+          {
+            name = "SecurityGroupHardwareKeyUsers",
+            type = "int"
+          },
+          {
+            name = "SecurityGroupHardwareKeyPercent",
+            type = "int"
+          },
+          {
+            name = "BioKeyUsers",
+            type = "int"
+          },
+          {
+            name = "SecurityGroupBioKeyUsers",
+            type = "int"
+          },
+          {
+            name = "SecurityGroupBioKeyPercent",
+            type = "int"
+          }
+        ]
+      }
+    }
+  })
+  response_export_values = ["*"]
+
+  depends_on = [
+    azurerm_log_analytics_workspace.log_analytics_workspace
+  ]
+}
+
+resource "azurerm_log_analytics_workspace_table" "fido2_metrics" {
+  workspace_id            = azurerm_log_analytics_workspace.log_analytics_workspace.id
+  name                    = azapi_resource.workspaces_table_fido2_metrics.name
+  retention_in_days       = 365
+  total_retention_in_days = 365
+
+  depends_on = [azapi_resource.workspaces_table_fido2_metrics]
+}
