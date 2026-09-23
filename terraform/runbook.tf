@@ -149,3 +149,22 @@ resource "azurerm_automation_runbook" "runbook_app_metrics" {
 
   tags = local.tags
 }
+
+data "local_file" "fido2_metrics" {
+  filename = "${path.module}/../scripts/ps/get-fido2-metrics.ps1"
+}
+
+resource "azurerm_automation_runbook" "runbook_fido2_metrics" {
+  name                    = "rb-${var.department}-${var.team}-${var.project}-fido2-metrics-script"
+  location                = var.location
+  resource_group_name     = local.rg_name
+  automation_account_name = azurerm_automation_account.automation_account.name
+  log_verbose             = "true"
+  log_progress            = "true"
+  description             = "Retrieves FIDO2 metrics."
+  runbook_type            = "PowerShell72"
+
+  content = data.local_file.fido2_metrics.content
+
+  tags = local.tags
+}
