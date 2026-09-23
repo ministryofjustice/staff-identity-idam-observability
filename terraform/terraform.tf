@@ -27,12 +27,6 @@ provider "azurerm" {
   use_oidc        = true
 }
 
-#provider "azuread" {
-#  tenant_id     = var.tenant_id
-#  client_id     = var.client_id
-#  client_secret = var.client_secret
-#}
-
 provider "azapi" {
   subscription_id  = var.subscription_id
   tenant_id        = var.tenant_id
@@ -47,10 +41,45 @@ data "azurerm_subscription" "primary" {
 
 locals {
   rg_name = "rg-${var.department}-${var.team}-${var.project}"
-  tags = {
-    department = var.department
-    team       = var.team
-    project    = var.project
-    source     = "terraform"
+
+  common_tags = {
+    application        = "IDAM Observability"
+    businessarea       = "DISO IdAM"
+    dataclassification = null
+    department         = var.department
+    infracontact       = "IDAM@justice.gov.uk"
+    owner              = "DISO IdAM"
+    project            = var.project
+    source             = "terraform"
+    team               = var.team
   }
+
+  workspace_tags = {
+    DEVL = {
+      environment = "Development"
+      purchaseorder      = "23070053085"
+    }
+    NLE = {
+      environment = "NLE"
+      purchaseorder      = "23070053085"
+    }
+    LIVE = {
+      environment = "Production"
+      purchaseorder      = "23070053085"
+    }
+    DEVLEXTERNAL = {
+      environment = "devl"
+      purchaseorder      = "23070053075"
+    }
+    NLEEXTERNAL = {
+      environment = "prep"
+      purchaseorder      = "23070053075"
+    }
+    LIVEEXTERNAL = {
+      environment = "prod"
+      purchaseorder      = "23070053075"
+    }
+  }
+
+  tags = merge(local.common_tags, local.workspace_tags[var.workspace_name])
 }
