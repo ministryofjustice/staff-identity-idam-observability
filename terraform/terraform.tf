@@ -45,6 +45,7 @@ locals {
   common_tags = {
     application        = "IDAM Observability"
     businessarea       = "DISO IdAM"
+    dataclassification = null
     department         = var.department
     infracontact       = "IDAM@justice.gov.uk"
     owner              = "DISO IdAM"
