@@ -68,15 +68,15 @@ locals {
       purchaseorder      = "23070053085"
     }
     DEVLEXTERNAL = {
-      environment = "devl"
+      environment = "DevelopmentExternal"
       purchaseorder      = "23070053075"
     }
     NLEEXTERNAL = {
-      environment = "prep"
+      environment = "NLEExternal"
       purchaseorder      = "23070053075"
     }
     LIVEEXTERNAL = {
-      environment = "prod"
+      environment = "ProdExternal"
       purchaseorder      = "23070053075"
     }
   }
