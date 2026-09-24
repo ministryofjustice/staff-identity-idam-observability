@@ -627,7 +627,7 @@ resource "azapi_resource" "workspaces_table_fido2_metrics" {
           },
           {
             name = "SecurityGroupHardwareKeyPercent",
-            type = "int"
+            type = "real"
           },
           {
             name = "BioKeyUsers",
@@ -639,7 +639,7 @@ resource "azapi_resource" "workspaces_table_fido2_metrics" {
           },
           {
             name = "SecurityGroupBioKeyPercent",
-            type = "int"
+            type = "real"
           }
         ]
       }

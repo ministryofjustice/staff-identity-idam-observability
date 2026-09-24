@@ -753,7 +753,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_fido2_metr
     }
     column {
       name = "SecurityGroupHardwareKeyPercent"
-      type = "int"
+      type = "real"
     }
     column {
       name = "BioKeyUsers"
@@ -765,7 +765,7 @@ resource "azurerm_monitor_data_collection_rule" "data_collection_rule_fido2_metr
     }
     column {
       name = "SecurityGroupBioKeyPercent"
-      type = "int"
+      type = "real"
     }
   }
 

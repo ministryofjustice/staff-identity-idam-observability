@@ -241,7 +241,7 @@ resource "azurerm_automation_schedule" "automation_schedule_fido2_metrics" {
   frequency               = "Day"
   interval                = 1
   timezone                = "Europe/London"
-  start_time              = "2026-09-24T06:00:00+01:00"
+  start_time              = "2026-09-25T06:00:00+01:00"
   description             = "Run FIDO2 metrics every day."
 }
 
