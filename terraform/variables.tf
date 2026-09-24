@@ -1,6 +1,18 @@
 variable "workspace_name" {
   type        = string
   description = "The name of the current workspace being run."
+
+  validation {
+    condition = contains([
+      "DEVL",
+      "NLE",
+      "LIVE",
+      "DEVLEXTERNAL",
+      "NLEEXTERNAL",
+      "LIVEEXTERNAL"
+    ], var.workspace_name)
+    error_message = "workspace_name must identify one of the six supported deployment environments."
+  }
 }
 
 variable "subscription_id" {
