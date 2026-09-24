@@ -16,8 +16,8 @@
     "* 4-7 * * 1"
   ],
   "terraform": {
-    "fileMatch": [
-      "\\.tf$"
+    "managerFilePatterns": [
+      "/\\.tf$/"
     ]
   },
   "prCreation": "immediate",
