@@ -56,28 +56,28 @@ locals {
 
   workspace_tags = {
     DEVL = {
-      environment = "Development"
-      purchaseorder      = "23070053085"
+      environment   = "Development"
+      purchaseorder = "23070053085"
     }
     NLE = {
-      environment = "NLE"
-      purchaseorder      = "23070053085"
+      environment   = "NLE"
+      purchaseorder = "23070053085"
     }
     LIVE = {
-      environment = "Production"
-      purchaseorder      = "23070053085"
+      environment   = "Production"
+      purchaseorder = "23070053085"
     }
     DEVLEXTERNAL = {
-      environment = "DevelopmentExternal"
-      purchaseorder      = "23070053075"
+      environment   = "DevelopmentExternal"
+      purchaseorder = "23070053075"
     }
     NLEEXTERNAL = {
-      environment = "NLEExternal"
-      purchaseorder      = "23070053075"
+      environment   = "NLEExternal"
+      purchaseorder = "23070053075"
     }
     LIVEEXTERNAL = {
-      environment = "ProdExternal"
-      purchaseorder      = "23070053075"
+      environment   = "ProdExternal"
+      purchaseorder = "23070053075"
     }
   }
 
