@@ -3,7 +3,7 @@ resource "azapi_resource" "workspaces_table" {
   name      = "${var.department}_${var.team}_${var.project}_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -56,7 +56,7 @@ resource "azapi_resource" "workspaces_table" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -69,7 +69,7 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
   name      = "${var.department}_${var.team}_${var.project}_AccessPackage_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -150,7 +150,7 @@ resource "azapi_resource" "workspaces_table_access_package_info" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -163,7 +163,7 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
   name      = "${var.department}_${var.team}_${var.project}_creds_cleanup_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -220,7 +220,7 @@ resource "azapi_resource" "workspaces_table_creds_cleanup_script" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -233,7 +233,7 @@ resource "azapi_resource" "workspaces_table_guest_users" {
   name      = "${var.department}_${var.team}_${var.project}_GuestUsers_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -306,7 +306,7 @@ resource "azapi_resource" "workspaces_table_guest_users" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -319,7 +319,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
   name      = "${var.department}_${var.team}_${var.project}_mfa_metrics_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -404,7 +404,7 @@ resource "azapi_resource" "workspaces_table_mfa_metrics" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -426,7 +426,7 @@ resource "azapi_resource" "workspaces_table_user_metrics" {
   name      = "${var.department}_${var.team}_${var.project}_user_metrics_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -467,7 +467,7 @@ resource "azapi_resource" "workspaces_table_user_metrics" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -489,7 +489,7 @@ resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
   name      = "${var.department}_${var.team}_${var.project}_T1Roles_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -514,7 +514,7 @@ resource "azapi_resource" "workspaces_table_T1_Perm_roles" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -536,7 +536,7 @@ resource "azapi_resource" "workspaces_table_app_metrics" {
   name      = "${var.department}_${var.team}_${var.project}_app_metrics_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -581,7 +581,7 @@ resource "azapi_resource" "workspaces_table_app_metrics" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
@@ -603,7 +603,7 @@ resource "azapi_resource" "workspaces_table_fido2_metrics" {
   name      = "${var.department}_${var.team}_${var.project}_fido2_metrics_logs_CL"
   parent_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
 
-  body = jsonencode({
+  body = {
     properties = {
       plan = "Analytics",
       schema = {
@@ -644,7 +644,7 @@ resource "azapi_resource" "workspaces_table_fido2_metrics" {
         ]
       }
     }
-  })
+  }
   response_export_values = ["*"]
 
   depends_on = [
