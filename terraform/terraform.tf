@@ -6,7 +6,7 @@ terraform {
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~>1.12.1"
+      version = "~> 2.13.0"
     }
   }
   backend "azurerm" {
@@ -45,7 +45,7 @@ locals {
   common_tags = {
     application        = "IDAM Observability"
     businessarea       = "DISO IdAM"
-    dataclassification = null
+    dataclassification = "Official"
     department         = var.department
     infracontact       = "IDAM@justice.gov.uk"
     owner              = "DISO IdAM"
