@@ -49,10 +49,10 @@ jobs:
 
     steps:
       - name: Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: ⚡️ SCA
-        uses: ministryofjustice/devsecops-actions/sca@234ac1dca7bb965417bae451d3ea284a1286d68c # v1.3.0
+        uses: ministryofjustice/devsecops-actions/sca@7dc13c20e2bf541b8a77fa1320a04983b18846f6 # v1.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }} # Mandatory
 
