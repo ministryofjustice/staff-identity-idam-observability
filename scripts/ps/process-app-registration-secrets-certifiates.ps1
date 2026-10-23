@@ -4,6 +4,7 @@
     
     .DESCRIPTION
     Leverage Microsoft Graph API and PowerShell to fetch a list of credentials (Certificates and Secrets) that are on Application Registrations, work out their expiry details, owners and send the data to Log Analytics..
+    Uses PowerShell 7.2 Runtime Environment
 #>
 param (
     [string]$MiClientId,
@@ -20,6 +21,7 @@ $excludedUpns = @("Matthew.White1@justice.gov.uk", "John.Dryden@justice.gov.uk")
 function Write-LogInfo($logentry) {
     Write-Output "$(get-date -Format "yyyy-MM-dd HH:mm:ss K") - $($logentry)"
 }
+#End of Function
 
 function PostLogAnalyticsData()
 {   
@@ -42,24 +44,57 @@ function PostLogAnalyticsData()
     $uri = "$dceURI/dataCollectionRules/$dcrImmutableId/streams/Custom-$table"+"?api-version=2023-01-01";
     Invoke-RestMethod -Uri $uri -Method $method -Body $logBody -Headers $headers;
 }
+# End of Function
 
-function ApplicationOwnersAsCsv($applicationId) {
-    $owners = Get-MgApplicationOwnerAsUser -ApplicationId $applicationId -Property UserPrincipalName | Select-Object UserPrincipalName
+function ApplicationOwnersAsCsv {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$ApplicationId
+    )
 
-    $cleanedOwners = foreach ($owner in $owners){
-        if ($owner.UserPrincipalName | Where-Object { $_ -notin $excludedUpns }) {
-            if ($owner.UserPrincipalName | Where-Object { -not $_.EndsWith("@JusticeUK.onmicrosoft.com") }) {
-                [PSCustomObject]@{
-                    UserPrincipalName         = $owner.UserPrincipalName
-                }
-            }
+    $owners = Get-MgApplicationOwnerAsUser `
+        -ApplicationId $ApplicationId `
+        -Property Mail, UserPrincipalName `
+        -All `
+        -ErrorAction Stop
+
+    $emailAddresses = foreach ($owner in $owners) {
+
+        # Continue using UPN for the exclusion checks
+        # (Matt White and John Dryden).
+        # When we update apps, determine whether this is still necessary.
+        if ($owner.UserPrincipalName -in $excludedUpns) {
+            continue
         }
+
+        # Prefer the Mail property.
+        if (-not [string]::IsNullOrWhiteSpace($owner.Mail)) {
+            $emailToUse = $owner.Mail
+        }
+        elseif (
+            -not [string]::IsNullOrWhiteSpace($owner.UserPrincipalName) -and
+            -not $owner.UserPrincipalName.EndsWith(
+                "@JusticeUK.onmicrosoft.com",
+                [System.StringComparison]::OrdinalIgnoreCase
+            )
+        ) {
+            # Fall back to UPN only when it is not a
+            # JusticeUK.onmicrosoft.com address.
+            $emailToUse = $owner.UserPrincipalName
+        }
+        else {
+            # No suitable email address is available for this owner.
+            continue
+        }
+
+        $emailToUse
     }
 
-    $cleanedOwners = $cleanedOwners | ConvertTo-Csv -NoTypeInformation    
-
-    return ($cleanedOwners -join "," -replace ('"', '') -replace ('UserPrincipalName,', ''))
+    # Return all valid owner email addresses as a comma-separated string.
+    return ($emailAddresses -join ",")
 }
+
+#End of Function
 
 function GenerateCredentials() {
 
